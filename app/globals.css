@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+/* ============================================================
+   VELTRIO — Design Tokens (Tailwind v4 CSS-first config)
+   ============================================================ */
+
+@theme inline {
+  /* --- Brand Colors --- */
+  --color-navy:       #0D1B2A;
+  --color-navy-deep:  #081320;
+  --color-navy-mid:   #162438;
+  --color-ivory:      #F5F0E8;
+  --color-ivory-dim:  #EDE8DF;
+  --color-mist:       #E8E4DC;
+  --color-gold:       #C9A84C;
+  --color-gold-light: #D4B76A;
+  --color-gold-dark:  #A8893C;
+  --color-slate:      #4A5568;
+  --color-slate-light:#6B7280;
+
+  /* --- Status Colors --- */
+  --color-approved:   #2D7A4F;
+  --color-blocked:    #9B2C2C;
+  --color-pending:    #B7791F;
+  --color-approved-bg:#F0FFF4;
+  --color-blocked-bg: #FFF5F5;
+  --color-pending-bg: #FFFBEB;
+
+  /* --- Fonts --- */
+  --font-sans:    var(--font-inter);
+  --font-display: var(--font-instrument);
+
+  /* --- Spacing overrides --- */
+  --spacing-18: 4.5rem;
+  --spacing-22: 5.5rem;
+  --spacing-128: 32rem;
+}
+
+:root {
+  --background: var(--color-navy);
+  --foreground: var(--color-ivory);
+}
+
+/* ============================================================
+   Base Resets
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  background-color: var(--color-navy);
+  color: var(--color-ivory);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.7;
+}
+
+/* ============================================================
+   Typography Helpers
+   ============================================================ */
+
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
+}
+
+/* ============================================================
+   Custom scrollbar (webkit) — subtle brand styling
+   ============================================================ */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-navy-deep);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-navy-mid);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold-dark);
+}
+
+/* ============================================================
+   Focus ring — accessible, brand-consistent
+   ============================================================ */
+
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* ============================================================
+   Shared form input style (used in demo page)
+   ============================================================ */
+
+.input-field {
+  width: 100%;
+  background-color: rgba(22, 36, 56, 0.6);
+  border: 1px solid rgba(245, 240, 232, 0.15);
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--color-ivory);
+  transition: border-color 0.15s ease;
+  outline: none;
+}
+
+.input-field::placeholder {
+  color: rgba(245, 240, 232, 0.25);
+}
+
+.input-field:focus {
+  border-color: rgba(201, 168, 76, 0.5);
+}
+
+/* ============================================================
+   Reduced motion — disable animations for accessibility
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
