@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: veltrio
+    runtime: node
+    plan: free
+    region: singapore
+    branch: main
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/rules
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production

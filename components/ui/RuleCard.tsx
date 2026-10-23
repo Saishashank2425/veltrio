@@ -29,8 +29,8 @@ export function RuleCard({
   return (
     <div
       className={cn(
-        "p-4 rounded-lg border border-ivory/10 bg-navy-mid/60 space-y-3",
-        "hover:border-gold/20 transition-colors",
+        "p-5 rounded-xl border border-ivory/10 bg-gradient-to-br from-navy-mid/70 to-navy-deep/55 space-y-3 shadow-md shadow-black/10",
+        "hover:border-gold/25 hover:shadow-lg hover:shadow-black/15 transition-all duration-300",
         className
       )}
     >

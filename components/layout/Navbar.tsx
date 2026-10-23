@@ -39,7 +39,7 @@ export function Navbar() {
       )}
     >
       <nav
-        className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between"
+        className="max-w-6xl mx-auto px-6 h-[4.5rem] flex items-center justify-between"
         aria-label="Main navigation"
       >
         {/* Logo */}
@@ -51,10 +51,10 @@ export function Navbar() {
         >
           <div className="relative w-7 h-7" aria-hidden>
             <svg viewBox="0 0 28 28" fill="none">
-              <rect x="2"  y="2"  width="11" height="11" rx="2" fill="#C9A84C" opacity="0.9" />
-              <rect x="15" y="2"  width="11" height="11" rx="2" fill="#C9A84C" opacity="0.4" />
-              <rect x="2"  y="15" width="11" height="11" rx="2" fill="#C9A84C" opacity="0.4" />
-              <rect x="15" y="15" width="11" height="11" rx="2" fill="#C9A84C" opacity="0.15" />
+              <rect x="2"  y="2"  width="11" height="11" rx="2" fill="#315BFF" opacity="0.9" />
+              <rect x="15" y="2"  width="11" height="11" rx="2" fill="#315BFF" opacity="0.4" />
+              <rect x="2"  y="15" width="11" height="11" rx="2" fill="#315BFF" opacity="0.4" />
+              <rect x="15" y="15" width="11" height="11" rx="2" fill="#315BFF" opacity="0.15" />
             </svg>
           </div>
           <span className="text-ivory font-semibold text-lg tracking-tight group-hover:text-gold transition-colors">

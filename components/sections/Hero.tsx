@@ -13,7 +13,7 @@ const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
    ------------------------------------------------------- */
 function GatewayDiagram() {
   return (
-    <div className="relative w-full max-w-lg mx-auto select-none" aria-hidden>
+    <div className="relative w-full max-w-lg mx-auto select-none rounded-3xl border border-ivory/10 bg-gradient-to-br from-navy-mid/70 to-navy-deep/60 p-3 sm:p-5 shadow-2xl shadow-black/25" aria-hidden>
       <svg
         viewBox="0 0 480 240"
         fill="none"
@@ -21,37 +21,37 @@ function GatewayDiagram() {
         className="w-full"
       >
         {/* Connecting lines */}
-        <line x1="120" y1="120" x2="190" y2="120" stroke="#C9A84C" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.5" />
-        <line x1="290" y1="120" x2="340" y2="80" stroke="#2D7A4F" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.6" />
-        <line x1="290" y1="120" x2="340" y2="160" stroke="#9B2C2C" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.6" />
+        <line className="gateway-flow" x1="120" y1="120" x2="190" y2="120" stroke="#315BFF" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.5" />
+        <line className="gateway-flow" x1="290" y1="120" x2="340" y2="80" stroke="#16794B" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.6" />
+        <line className="gateway-flow" x1="290" y1="120" x2="340" y2="160" stroke="#B42318" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.6" />
 
         {/* AI Agent node */}
-        <rect x="20" y="92" width="100" height="56" rx="8" fill="#162438" stroke="#C9A84C" strokeWidth="1" strokeOpacity="0.4" />
-        <text x="70" y="114" textAnchor="middle" fill="#F5F0E8" fontSize="10" fontWeight="600">AI Agent</text>
-        <text x="70" y="130" textAnchor="middle" fill="#C9A84C" fontSize="9" opacity="0.8">proposes</text>
-        <text x="70" y="144" textAnchor="middle" fill="#C9A84C" fontSize="9" opacity="0.8">a purchase</text>
+        <rect x="20" y="92" width="100" height="56" rx="8" fill="#FFFFFF" stroke="#315BFF" strokeWidth="1" strokeOpacity="0.4" />
+        <text x="70" y="114" textAnchor="middle" fill="#111827" fontSize="10" fontWeight="600">AI Agent</text>
+        <text x="70" y="130" textAnchor="middle" fill="#315BFF" fontSize="9" opacity="0.8">proposes</text>
+        <text x="70" y="144" textAnchor="middle" fill="#315BFF" fontSize="9" opacity="0.8">a purchase</text>
 
         {/* Gateway node */}
-        <rect x="188" y="80" width="104" height="80" rx="8" fill="#0D1B2A" stroke="#C9A84C" strokeWidth="1.5" strokeOpacity="0.8" />
-        <text x="240" y="108" textAnchor="middle" fill="#C9A84C" fontSize="10" fontWeight="700" letterSpacing="0.05em">GATEWAY</text>
-        <text x="240" y="124" textAnchor="middle" fill="#F5F0E8" fontSize="9" opacity="0.6">checks rules</text>
-        <text x="240" y="138" textAnchor="middle" fill="#F5F0E8" fontSize="9" opacity="0.6">deterministically</text>
-        <text x="240" y="152" textAnchor="middle" fill="#F5F0E8" fontSize="8" opacity="0.4">≤ 2ms</text>
+        <rect x="188" y="80" width="104" height="80" rx="8" fill="#FFFFFF" stroke="#315BFF" strokeWidth="1.5" strokeOpacity="0.8" />
+        <text x="240" y="108" textAnchor="middle" fill="#315BFF" fontSize="10" fontWeight="700" letterSpacing="0.05em">GATEWAY</text>
+        <text x="240" y="124" textAnchor="middle" fill="#111827" fontSize="9" opacity="0.6">checks rules</text>
+        <text x="240" y="138" textAnchor="middle" fill="#111827" fontSize="9" opacity="0.6">deterministically</text>
+        <text x="240" y="152" textAnchor="middle" fill="#111827" fontSize="8" opacity="0.4">≤ 2ms</text>
 
         {/* Approved node */}
-        <rect x="340" y="44" width="120" height="52" rx="8" fill="#0D1B2A" stroke="#2D7A4F" strokeWidth="1" strokeOpacity="0.7" />
-        <text x="400" y="67" textAnchor="middle" fill="#2D7A4F" fontSize="10" fontWeight="600">✓ Approved</text>
-        <text x="400" y="82" textAnchor="middle" fill="#F5F0E8" fontSize="9" opacity="0.5">purchase executes</text>
-        <text x="400" y="92" textAnchor="middle" fill="#F5F0E8" fontSize="9" opacity="0.5">+ audit log</text>
+        <rect x="340" y="44" width="120" height="52" rx="8" fill="#FFFFFF" stroke="#16794B" strokeWidth="1" strokeOpacity="0.7" />
+        <text x="400" y="67" textAnchor="middle" fill="#16794B" fontSize="10" fontWeight="600">✓ Approved</text>
+        <text x="400" y="82" textAnchor="middle" fill="#111827" fontSize="9" opacity="0.5">purchase executes</text>
+        <text x="400" y="92" textAnchor="middle" fill="#111827" fontSize="9" opacity="0.5">+ audit log</text>
 
         {/* Blocked node */}
-        <rect x="340" y="144" width="120" height="52" rx="8" fill="#0D1B2A" stroke="#9B2C2C" strokeWidth="1" strokeOpacity="0.7" />
-        <text x="400" y="167" textAnchor="middle" fill="#9B2C2C" fontSize="10" fontWeight="600">✗ Blocked</text>
-        <text x="400" y="182" textAnchor="middle" fill="#F5F0E8" fontSize="9" opacity="0.5">rule violated</text>
-        <text x="400" y="192" textAnchor="middle" fill="#F5F0E8" fontSize="9" opacity="0.5">+ reason logged</text>
+        <rect x="340" y="144" width="120" height="52" rx="8" fill="#FFFFFF" stroke="#B42318" strokeWidth="1" strokeOpacity="0.7" />
+        <text x="400" y="167" textAnchor="middle" fill="#B42318" fontSize="10" fontWeight="600">✗ Blocked</text>
+        <text x="400" y="182" textAnchor="middle" fill="#111827" fontSize="9" opacity="0.5">rule violated</text>
+        <text x="400" y="192" textAnchor="middle" fill="#111827" fontSize="9" opacity="0.5">+ reason logged</text>
 
         {/* Ambient ring */}
-        <circle cx="240" cy="120" r="52" stroke="#C9A84C" strokeWidth="0.5" opacity="0.15" />
+        <circle className="gateway-ring" cx="240" cy="120" r="52" stroke="#315BFF" strokeWidth="0.5" opacity="0.15" />
       </svg>
     </div>
   );
@@ -62,18 +62,11 @@ function GatewayDiagram() {
    ------------------------------------------------------- */
 export function Hero() {
   return (
-    <section className="relative min-h-screen flex flex-col justify-center overflow-hidden pt-24 pb-20 px-6">
+    <section className="relative min-h-[100svh] flex flex-col justify-start lg:justify-center overflow-hidden pt-28 pb-16 sm:pt-32 sm:pb-20 px-6">
       {/* Subtle background gradient */}
-      <div
-        aria-hidden
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.06) 0%, transparent 70%)",
-        }}
-      />
+      <div aria-hidden className="hero-grid absolute inset-0 pointer-events-none" />
 
-      <div className="max-w-6xl mx-auto w-full">
+      <div className="max-w-6xl mx-auto w-full flex-none">
         <div className="grid lg:grid-cols-2 gap-16 lg:gap-12 items-center">
           {/* Left — Copy */}
           <div className="flex flex-col">
@@ -93,7 +86,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.12, duration: 0.6, ease: EASE }}
-              className="text-5xl sm:text-6xl lg:text-7xl font-bold text-ivory leading-[1.05] tracking-tight mb-6"
+              className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold text-ivory leading-[1.04] tracking-tight mb-6"
             >
               Commerce moves.
               <br />
@@ -153,7 +146,7 @@ export function Hero() {
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3, duration: 0.8, ease: EASE }}
-            className="hidden lg:flex items-center justify-center"
+            className="hidden md:flex items-center justify-center lg:justify-end"
           >
             <GatewayDiagram />
           </motion.div>

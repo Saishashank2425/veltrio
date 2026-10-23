@@ -60,8 +60,8 @@ export function TrustSection() {
                 duration: 0.6,
                 ease: [0.22, 1, 0.36, 1],
               }}
-              className="group p-8 rounded-xl border border-ivory/10 bg-navy-mid/20
-                         hover:border-gold/20 hover:bg-navy-mid/40 transition-all duration-300"
+              className="group p-7 sm:p-8 rounded-2xl border border-ivory/10 bg-gradient-to-br from-navy-mid/55 to-navy-deep/40 shadow-lg shadow-black/10
+                         hover:-translate-y-1 hover:border-gold/25 hover:shadow-xl hover:shadow-black/20 transition-all duration-300"
             >
               <div
                 className="w-10 h-10 rounded-lg border border-gold/30 bg-gold/8 flex items-center justify-center mb-5

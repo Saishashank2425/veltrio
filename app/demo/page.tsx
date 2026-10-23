@@ -161,10 +161,10 @@ const DECISION_CONFIG: Record<
 };
 
 const TAG_STYLES: Record<string, string> = {
-  allow: "border-approved/30 text-approved",
-  block: "border-blocked/30 text-blocked",
-  escalate: "border-pending/30 text-pending",
-  adversarial: "border-gold/30 text-gold",
+  allow: "border-emerald-700/20 bg-emerald-50 text-emerald-800",
+  block: "border-rose-700/20 bg-rose-50 text-rose-800",
+  escalate: "border-amber-700/20 bg-amber-50 text-amber-900",
+  adversarial: "border-blue-700/20 bg-blue-50 text-blue-800",
 };
 
 /* ============================================================
@@ -251,7 +251,7 @@ function SandboxTab() {
                 key={i}
                 onClick={() => applyScenario(i)}
                 className={`text-xs px-3 py-1.5 rounded-md border bg-transparent cursor-pointer
-                            transition-all hover:opacity-100 opacity-70 hover:bg-ivory/5
+                            transition-all hover:-translate-y-0.5 hover:shadow-sm
                             ${TAG_STYLES[s.tag]}`}
               >
                 {s.label}
@@ -383,13 +383,13 @@ function SandboxTab() {
               {/* Triggering rule */}
               {result.triggeringRule && (
                 <div className="rounded-lg bg-navy/10 p-4 space-y-1">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-navy/50">Triggering Rule</p>
-                  <p className="text-sm font-semibold text-navy/90">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-ivory/50">Triggering Rule</p>
+                  <p className="text-sm font-semibold text-ivory/90">
                     {result.triggeringRule.ruleId} — {result.triggeringRule.ruleName}
                   </p>
-                  <p className="text-xs text-navy/65 leading-relaxed">{result.triggeringRule.reason}</p>
+                  <p className="text-xs text-ivory/65 leading-relaxed">{result.triggeringRule.reason}</p>
                   {result.triggeringRule.valueChecked && (
-                    <p className="text-xs font-mono text-navy/45 mt-1">
+                    <p className="text-xs font-mono text-ivory/45 mt-1">
                       checked: {result.triggeringRule.valueChecked}
                     </p>
                   )}
@@ -399,8 +399,8 @@ function SandboxTab() {
               {/* Rule trace toggle */}
               <div>
                 <button onClick={() => setShowTrace(v => !v)}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-navy/55
-                             hover:text-navy/80 transition-colors cursor-pointer">
+                  className="flex items-center gap-1.5 text-xs font-semibold text-ivory/55
+                             hover:text-ivory/80 transition-colors cursor-pointer">
                   {showTrace ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                   Full rule trace ({result.rulesEvaluated.length} rules)
                 </button>
@@ -412,7 +412,7 @@ function SandboxTab() {
                       exit={{ height: 0, opacity: 0 }}
                       className="mt-3 space-y-2 overflow-hidden">
                       {result.rulesEvaluated.map((r) => (
-                        <li key={r.ruleId} className="flex items-start gap-2 text-xs text-navy/65">
+                        <li key={r.ruleId} className="flex items-start gap-2 text-xs text-ivory/65">
                           <span className={`font-bold shrink-0 mt-0.5 ${
                             r.outcome === "ALLOW" ? "text-approved" :
                             r.outcome === "BLOCK" ? "text-blocked" : "text-pending"
@@ -421,7 +421,7 @@ function SandboxTab() {
                           </span>
                           <span>
                             <strong>{r.ruleId}</strong> {r.ruleName}
-                            <span className="text-navy/45"> — {r.reason}</span>
+                            <span className="text-ivory/45"> — {r.reason}</span>
                           </span>
                         </li>
                       ))}
@@ -431,17 +431,17 @@ function SandboxTab() {
               </div>
 
               {/* Audit metadata */}
-              <div className="border-t border-navy/10 pt-4 grid grid-cols-2 gap-3 text-xs text-navy/45">
+              <div className="border-t border-navy/10 pt-4 grid grid-cols-2 gap-3 text-xs text-ivory/45">
                 <div>
-                  <p className="font-semibold text-navy/60 mb-0.5">Audit ID</p>
+                  <p className="font-semibold text-ivory/60 mb-0.5">Audit ID</p>
                   <p className="font-mono text-[10px] break-all">{result.auditId}</p>
                 </div>
                 <div>
-                  <p className="font-semibold text-navy/60 mb-0.5">Duration</p>
+                  <p className="font-semibold text-ivory/60 mb-0.5">Duration</p>
                   <p>{result.durationMs}ms</p>
                 </div>
                 <div className="col-span-2">
-                  <p className="font-semibold text-navy/60 mb-0.5">Timestamp (UTC)</p>
+                  <p className="font-semibold text-ivory/60 mb-0.5">Timestamp (UTC)</p>
                   <p className="font-mono">{result.timestamp}</p>
                 </div>
               </div>
@@ -627,7 +627,7 @@ export default function DemoPage() {
     <div className="min-h-screen bg-navy text-ivory">
       {/* Header */}
       <div className="border-b border-ivory/10 bg-navy-deep/80 backdrop-blur-sm sticky top-0 z-40">
-        <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
           <Link href="/"
             className="flex items-center gap-2 text-sm text-ivory/50 hover:text-ivory transition-colors">
             <ArrowLeft className="w-4 h-4" />
@@ -640,10 +640,10 @@ export default function DemoPage() {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-10">
+      <div className="max-w-6xl mx-auto px-6 py-12 sm:py-16">
         {/* Page header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-ivory mb-2">Try the Gateway</h1>
+          <h1 className="font-display text-4xl sm:text-5xl font-semibold tracking-tight text-ivory mb-3">Try the Gateway</h1>
           <p className="text-ivory/45 text-sm max-w-xl">
             Submit a purchase proposal as an AI agent. The deterministic rule engine evaluates
             it against your spending rules and returns a decision with a full audit trail — in milliseconds.
@@ -651,12 +651,12 @@ export default function DemoPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-ivory/10 mb-8 gap-1">
+        <div role="tablist" aria-label="Gateway demo views" className="flex border-b border-ivory/10 mb-8 gap-1 overflow-x-auto">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-all cursor-pointer
+              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all cursor-pointer
                           border-b-2 -mb-px rounded-t-md
                           ${activeTab === tab.id
                             ? "border-gold text-ivory bg-gold/5"
@@ -676,7 +676,7 @@ export default function DemoPage() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.2 }} className="rounded-2xl border border-ivory/10 bg-navy-mid/25 p-4 sm:p-7 shadow-2xl shadow-black/10"
           >
             {activeTab === "sandbox" && <SandboxTab />}
             {activeTab === "audit" && <AuditLogTab />}

@@ -13,9 +13,9 @@ export function StepCard({ step, icon: Icon, title, description, className }: St
   return (
     <div
       className={cn(
-        "relative flex flex-col gap-4 p-8",
-        "border border-ivory/10 rounded-xl bg-navy-mid/40",
-        "hover:border-gold/30 transition-colors duration-300",
+        "group relative flex flex-col gap-5 p-7 sm:p-8",
+        "border border-ivory/10 rounded-2xl bg-gradient-to-br from-navy-mid/75 to-navy-deep/55 shadow-lg shadow-black/10",
+        "hover:-translate-y-1 hover:border-gold/35 hover:shadow-xl hover:shadow-black/20 transition-all duration-300",
         className
       )}
     >
