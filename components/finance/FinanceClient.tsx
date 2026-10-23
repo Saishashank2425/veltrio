@@ -43,7 +43,7 @@ type Draft = {
 
 const emptyDraft = (): Draft => ({
   kind: "transaction", name: "", amount: "", currency: "INR",
-  date: new Date().toISOString().slice(0, 10), category: "Other",
+  date: "", category: "Other",
   transactionType: "expense", status: "completed", frequency: "monthly",
   nextDate: "", provider: "", issuer: "", lastFour: "", creditLimit: "",
   outstanding: "", statementBalance: "", minimumDue: "", statementDate: "",
@@ -146,7 +146,7 @@ export default function FinanceClient() {
 
   function openNew(kind: RecordKind = tab === "overview" ? "transaction" : tab) {
     setEditingId(null);
-    setDraft({ ...emptyDraft(), kind, category: kind === "subscription" ? "Subscriptions" : kind === "emi" ? "EMI & loans" : kind === "card" ? "Credit card payment" : "Other", transactionType: kind === "transaction" ? "expense" : "expense", status: kind === "subscription" || kind === "emi" ? "active" : kind === "card" ? "active" : kind === "bill" ? "upcoming" : "completed" });
+    setDraft({ ...emptyDraft(), date: new Date().toISOString().slice(0, 10), kind, category: kind === "subscription" ? "Subscriptions" : kind === "emi" ? "EMI & loans" : kind === "card" ? "Credit card payment" : "Other", transactionType: kind === "transaction" ? "expense" : "expense", status: kind === "subscription" || kind === "emi" ? "active" : kind === "card" ? "active" : kind === "bill" ? "upcoming" : "completed" });
     setShowForm(true);
   }
 
