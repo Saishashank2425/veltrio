@@ -84,6 +84,7 @@ function badgeClass(status: string) {
 
 export default function FinanceClient() {
   const [records, setRecords] = useState<FinancialRecord[]>([]);
+  const [hydrated, setHydrated] = useState(false);
   const [tab, setTab] = useState<"overview" | RecordKind>("overview");
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -105,13 +106,16 @@ export default function FinanceClient() {
       }
     } catch {
       setNotice("Saved browser data could not be read. Export any important data before clearing browser storage.");
+    } finally {
+      setHydrated(true);
     }
   }, []);
 
   useEffect(() => {
+    if (!hydrated) return;
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); }
     catch { setNotice("Could not save changes in this browser. Export your data and check available storage."); }
-  }, [records]);
+  }, [records, hydrated]);
 
   const transactions = useMemo(() => records.filter((r) => r.kind === "transaction"), [records]);
   const subscriptions = useMemo(() => records.filter((r) => r.kind === "subscription" && !["cancelled"].includes(r.status)), [records]);
