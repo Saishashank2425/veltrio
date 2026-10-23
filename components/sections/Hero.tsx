@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { AgentHeroDemo } from "@/components/sections/AgentHeroDemo";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -141,14 +142,14 @@ export function Hero() {
             </motion.div>
           </div>
 
-          {/* Right — Diagram */}
+          {/* Right — Interactive agent demo */}
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3, duration: 0.8, ease: EASE }}
             className="hidden md:flex items-center justify-center lg:justify-end"
           >
-            <GatewayDiagram />
+            <AgentHeroDemo />
           </motion.div>
         </div>
       </div>
