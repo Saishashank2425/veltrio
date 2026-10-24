@@ -22,19 +22,19 @@ function GatewayDiagram() {
         className="w-full"
       >
         {/* Connecting lines */}
-        <line className="gateway-flow" x1="120" y1="120" x2="190" y2="120" stroke="#315BFF" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.5" />
+        <line className="gateway-flow" x1="120" y1="120" x2="190" y2="120" stroke="#C9A86A" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.5" />
         <line className="gateway-flow" x1="290" y1="120" x2="340" y2="80" stroke="#16794B" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.6" />
         <line className="gateway-flow" x1="290" y1="120" x2="340" y2="160" stroke="#B42318" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.6" />
 
         {/* AI Agent node */}
-        <rect x="20" y="92" width="100" height="56" rx="8" fill="#FFFFFF" stroke="#315BFF" strokeWidth="1" strokeOpacity="0.4" />
+        <rect x="20" y="92" width="100" height="56" rx="8" fill="#FFFFFF" stroke="#C9A86A" strokeWidth="1" strokeOpacity="0.4" />
         <text x="70" y="114" textAnchor="middle" fill="#111827" fontSize="10" fontWeight="600">AI Agent</text>
-        <text x="70" y="130" textAnchor="middle" fill="#315BFF" fontSize="9" opacity="0.8">proposes</text>
-        <text x="70" y="144" textAnchor="middle" fill="#315BFF" fontSize="9" opacity="0.8">a purchase</text>
+        <text x="70" y="130" textAnchor="middle" fill="#C9A86A" fontSize="9" opacity="0.8">proposes</text>
+        <text x="70" y="144" textAnchor="middle" fill="#C9A86A" fontSize="9" opacity="0.8">a purchase</text>
 
         {/* Gateway node */}
-        <rect x="188" y="80" width="104" height="80" rx="8" fill="#FFFFFF" stroke="#315BFF" strokeWidth="1.5" strokeOpacity="0.8" />
-        <text x="240" y="108" textAnchor="middle" fill="#315BFF" fontSize="10" fontWeight="700" letterSpacing="0.05em">GATEWAY</text>
+        <rect x="188" y="80" width="104" height="80" rx="8" fill="#FFFFFF" stroke="#C9A86A" strokeWidth="1.5" strokeOpacity="0.8" />
+        <text x="240" y="108" textAnchor="middle" fill="#C9A86A" fontSize="10" fontWeight="700" letterSpacing="0.05em">GATEWAY</text>
         <text x="240" y="124" textAnchor="middle" fill="#111827" fontSize="9" opacity="0.6">checks rules</text>
         <text x="240" y="138" textAnchor="middle" fill="#111827" fontSize="9" opacity="0.6">deterministically</text>
         <text x="240" y="152" textAnchor="middle" fill="#111827" fontSize="8" opacity="0.4">≤ 2ms</text>
@@ -52,7 +52,7 @@ function GatewayDiagram() {
         <text x="400" y="192" textAnchor="middle" fill="#111827" fontSize="9" opacity="0.5">+ reason logged</text>
 
         {/* Ambient ring */}
-        <circle className="gateway-ring" cx="240" cy="120" r="52" stroke="#315BFF" strokeWidth="0.5" opacity="0.15" />
+        <circle className="gateway-ring" cx="240" cy="120" r="52" stroke="#C9A86A" strokeWidth="0.5" opacity="0.15" />
       </svg>
     </div>
   );

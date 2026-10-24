@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -219,8 +219,12 @@ function SandboxTab() {
           description, isSubscription, isNewVendor,
         }),
       });
-      const data: AuthorizationResult = await res.json();
-      setResult(data);
+      const data = await res.json();
+      if (!res.ok) {
+        setError(typeof data.error === "string" ? data.error : "The gateway rejected this proposal.");
+        return;
+      }
+      setResult(data as AuthorizationResult);
     } catch {
       setError("Cannot reach the authorization gateway.");
     } finally {
@@ -472,8 +476,8 @@ function AuditLogTab() {
     } finally { setLoading(false); }
   }
 
-  // Auto-load on mount
-  useState(() => { load(); });
+  // Auto-load on mount without performing side effects during render.
+  useEffect(() => { void load(); }, []);
 
   return (
     <div className="space-y-4">
