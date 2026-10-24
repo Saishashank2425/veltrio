@@ -114,7 +114,7 @@ type RuleEvaluator = (p: PurchaseProposal) => RuleResult;
 const RULES: RuleEvaluator[] = [
   /* R001 — Vendor allowlist */
   (p) => {
-    if (p.isNewVendor && !POLICY.ALLOWED_VENDORS.has(p.vendor)) {
+    if (!POLICY.ALLOWED_VENDORS.has(p.vendor)) {
       return {
         ruleId: "R001",
         ruleName: "Vendor Allowlist",
