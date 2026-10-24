@@ -154,9 +154,8 @@ export function SpendingControl() {
               <h3 className="text-sm font-semibold text-ivory/80 tracking-wide">
                 Decision Feed
               </h3>
-              <span className="flex items-center gap-1.5 text-xs text-approved">
-                <span className="w-1.5 h-1.5 rounded-full bg-approved animate-pulse" />
-                Live
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-ivory/10 bg-ivory/5 px-2.5 py-1 text-[11px] text-ivory/45">
+                Illustrative sample data
               </span>
             </div>
 
