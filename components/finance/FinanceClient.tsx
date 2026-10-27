@@ -275,7 +275,8 @@ export default function FinanceClient() {
             <button onClick={() => openNew()} className="flex items-center gap-2 rounded-xl bg-blue-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"><Plus size={16}/> Add record</button>
           </div>
         </div>
-      </header>\n      <PageGuide eyebrow="Personal finance workspace" title="Why this page exists" purpose="Keep a manual, organised view of transactions, subscriptions, cards, EMIs, and bills so you can review obligations in one place." steps={["Add a record manually or import a CSV.","Review categories, dates, and amounts.","Check upcoming bills and recurring costs.","Export your records when you need a backup."]} note="Records are saved in this browser only. Bank syncing, automatic bill detection, and payment execution are not connected." />
+      </header>
+      <PageGuide eyebrow="Personal finance workspace" title="Why this page exists" purpose="Keep a manual, organised view of transactions, subscriptions, cards, EMIs, and bills so you can review obligations in one place." steps={["Add a record manually or import a CSV.","Review categories, dates, and amounts.","Check upcoming bills and recurring costs.","Export your records when you need a backup."]} note="Records are saved in this browser only. Bank syncing, automatic bill detection, and payment execution are not connected." />
 
       <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
         <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-end">
