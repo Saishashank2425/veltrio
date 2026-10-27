@@ -37,7 +37,7 @@ function parseMandate(raw: string): ParsedMandate {
   const expiresInDays = expiresMatch ? Number(expiresMatch[1]) * (/week/i.test(expiresMatch[2]) ? 7 : /month/i.test(expiresMatch[2]) ? 30 : 1) : null;
 
   const knownCategories = ["electronics", "groceries", "food", "travel", "fashion", "health", "subscriptions", "software", "home", "entertainment"];
-  const categories = knownCategories.filter(category => lower.includes(category));
+  const categories = knownCategories.filter(category => lower.includes(category) && !new RegExp(`(?:block|never|do not buy|exclude)\\\\s+(?:\\\\w+\\\\s+){0,2}${category}`, "i").test(text));\n  const blockedCategories = knownCategories.filter(category => new RegExp(`(?:block|never|do not buy|exclude)\\\\s+(?:\\\\w+\\\\s+){0,2}${category}`, "i").test(text));
   const merchantMatch = text.match(/(?:only at|only from|allow(?:ed)? merchants?|allowlist|approved stores?)\s*[:=]?\s*([^.;\n]+)/i);
   const blockedMatch = text.match(/(?:never at|block(?:ed)? merchants?|do not buy from|exclude stores?)\s*[:=]?\s*([^.;\n]+)/i);
   const splitNames = (s?: string) => s ? s.split(/,|\band\b/i).map(x => x.trim()).filter(Boolean).slice(0, 12) : [];
