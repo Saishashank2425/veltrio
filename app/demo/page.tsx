@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -219,8 +219,12 @@ function SandboxTab() {
           description, isSubscription, isNewVendor,
         }),
       });
-      const data: AuthorizationResult = await res.json();
-      setResult(data);
+      const data = await res.json();
+      if (!res.ok) {
+        setError(typeof data.error === "string" ? data.error : "The gateway rejected this proposal.");
+        return;
+      }
+      setResult(data as AuthorizationResult);
     } catch {
       setError("Cannot reach the authorization gateway.");
     } finally {
@@ -466,14 +470,27 @@ function AuditLogTab() {
     try {
       const res = await fetch("/api/authorize");
       const data = await res.json();
+      if (!res.ok || !Array.isArray(data.entries)) throw new Error("Invalid audit response");
       setEntries(data.entries);
     } catch {
       setError("Failed to load audit log.");
     } finally { setLoading(false); }
   }
 
-  // Auto-load on mount
-  useState(() => { load(); });
+  async function resetDemo() {
+    if (!window.confirm("Reset the demo spend counters and clear its audit log?")) return;
+    setLoading(true); setError(null);
+    try {
+      const res = await fetch("/api/reset", { method: "POST" });
+      if (!res.ok) throw new Error("Reset failed");
+      await load();
+    } catch {
+      setError("Could not reset the demo. Please try again.");
+    } finally { setLoading(false); }
+  }
+
+  // Auto-load on mount without performing side effects during render.
+  useEffect(() => { void load(); }, []);
 
   return (
     <div className="space-y-4">
@@ -481,10 +498,15 @@ function AuditLogTab() {
         <p className="text-sm text-ivory/50">
           Last {entries?.length ?? 0} authorization decisions this session.
         </p>
-        <Button variant="secondary" size="sm" onClick={load} disabled={loading}>
-          {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCcw className="w-3.5 h-3.5" />}
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" onClick={resetDemo} disabled={loading}>
+            Reset demo
+          </Button>
+          <Button variant="secondary" size="sm" onClick={() => void load()} disabled={loading}>
+            {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCcw className="w-3.5 h-3.5" />}
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {error && <p className="text-sm text-blocked">{error}</p>}

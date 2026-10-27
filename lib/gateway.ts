@@ -54,6 +54,18 @@ export const monthlySpend: Record<string, number> = {
   "Software & SaaS": 0,
 };
 
+const INITIAL_MONTHLY_SPEND: Record<string, number> = {
+  Travel: 1340,
+  "Operating Expenses": 4780,
+  "Software & SaaS": 0,
+};
+
+export function resetDemoState(): void {
+  for (const key of Object.keys(monthlySpend)) delete monthlySpend[key];
+  Object.assign(monthlySpend, INITIAL_MONTHLY_SPEND);
+  auditLog.length = 0;
+}
+
 export function getCategorySpend(category: string): number {
   return monthlySpend[category] ?? 0;
 }
@@ -114,7 +126,7 @@ type RuleEvaluator = (p: PurchaseProposal) => RuleResult;
 const RULES: RuleEvaluator[] = [
   /* R001 — Vendor allowlist */
   (p) => {
-    if (p.isNewVendor && !POLICY.ALLOWED_VENDORS.has(p.vendor)) {
+    if (!POLICY.ALLOWED_VENDORS.has(p.vendor)) {
       return {
         ruleId: "R001",
         ruleName: "Vendor Allowlist",
@@ -285,29 +297,48 @@ export function validateProposal(
   }
 
   const b = body as Record<string, unknown>;
-  const required = ["agent", "vendor", "category", "amount", "description"] as const;
+  const requiredTextFields = ["agent", "vendor", "category", "description"] as const;
 
-  for (const field of required) {
+  for (const field of requiredTextFields) {
     if (b[field] === undefined || b[field] === null || b[field] === "") {
       return { ok: false, error: `Missing required field: ${field}` };
     }
+    if (typeof b[field] !== "string" || !b[field].trim()) {
+      return { ok: false, error: `${field} must be a non-empty string.` };
+    }
   }
 
-  if (typeof b.amount !== "number" || b.amount <= 0 || !isFinite(b.amount)) {
+  if (typeof b.amount !== "number" || b.amount <= 0 || !Number.isFinite(b.amount)) {
     return { ok: false, error: "amount must be a positive finite number (USD)." };
   }
+
+  if (b.currency !== undefined && b.currency !== "USD") {
+    return { ok: false, error: "Only USD is supported by the current authorization policy." };
+  }
+
+  for (const field of ["isSubscription", "isNewVendor"] as const) {
+    if (b[field] !== undefined && typeof b[field] !== "boolean") {
+      return { ok: false, error: `${field} must be a boolean when provided.` };
+    }
+  }
+
+  // Narrow the validated unknown values before constructing the typed proposal.
+  const agent = b.agent as string;
+  const vendor = b.vendor as string;
+  const category = b.category as string;
+  const description = b.description as string;
 
   return {
     ok: true,
     proposal: {
-      agent: String(b.agent).slice(0, 100),
-      vendor: String(b.vendor).slice(0, 100),
-      category: String(b.category).slice(0, 100),
+      agent: agent.slice(0, 100),
+      vendor: vendor.slice(0, 100),
+      category: category.slice(0, 100),
       amount: b.amount,
-      currency: b.currency ? String(b.currency).slice(0, 3) : "USD",
-      description: String(b.description).slice(0, 500),
-      isSubscription: Boolean(b.isSubscription),
-      isNewVendor: Boolean(b.isNewVendor),
+      currency: "USD",
+      description: description.slice(0, 500),
+      isSubscription: b.isSubscription === true,
+      isNewVendor: b.isNewVendor === true,
     },
   };
 }
