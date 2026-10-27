@@ -7,7 +7,7 @@ import { SpendingControl } from "@/components/sections/SpendingControl";
 import { TrustSection } from "@/components/sections/TrustSection";
 import { CallToAction } from "@/components/sections/CallToAction";
 import Link from "next/link";
-import { ArrowRight, Search, ShieldCheck, SlidersHorizontal, WalletCards } from "lucide-react";
+import { ArrowRight, CreditCard, Search, ShieldCheck, SlidersHorizontal, WalletCards } from "lucide-react";
 
 export default function Home() {
   return (
@@ -28,7 +28,8 @@ export default function Home() {
                 { href: "/shop", number: "02", title: "Product search", desc: "Search listings and verify final details with the retailer.", action: "Compare options", Icon: SlidersHorizontal },
                 { href: "/mandates", number: "03", title: "Spending mandates", desc: "Draft limits, merchant rules, and approval thresholds for review.", action: "Draft a mandate", Icon: ShieldCheck },
                 { href: "/demo", number: "04", title: "Gateway demo", desc: "Submit a sample proposal and inspect ALLOW, BLOCK, or ESCALATE.", action: "Test a decision", Icon: WalletCards },
-                { href: "/finance", number: "05", title: "Finance workspace", desc: "Organise transactions, subscriptions, cards, EMIs, and bills locally.", action: "Review records", Icon: WalletCards },
+                { href: "/checkout", number: "05", title: "PayPal sandbox", desc: "Run a policy-first checkout flow with a sandbox order and capture.", action: "Test sandbox checkout", Icon: CreditCard },
+                { href: "/finance", number: "06", title: "Finance workspace", desc: "Organise transactions, subscriptions, cards, EMIs, and bills locally.", action: "Review records", Icon: WalletCards },
               ].map(({ href, number, title, desc, action, Icon }) => (
                 <Link key={href} href={href} className="group flex min-h-[230px] flex-col rounded-2xl border border-white/10 bg-white/[.035] p-5 transition duration-200 hover:-translate-y-1 hover:border-[#315BFF]/50 hover:bg-white/[.06]">
                   <div className="flex items-center justify-between">
