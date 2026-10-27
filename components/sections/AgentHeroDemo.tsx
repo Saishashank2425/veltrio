@@ -21,12 +21,31 @@ const tourScenes = [
   { title: "3. Keep control", body: "A purchase proposal must pass explicit rules. This demo does not connect checkout or move money.", state: "Approval remains with you" },
 ];
 
+const tourScenes = [
+  { title: "1. Describe the task", body: "Tell the agent what you need, your budget, and the constraints it must respect.", state: "Request received" },
+  { title: "2. Review the options", body: "The workspace organises the next step and shows which sources or tools are actually available.", state: "Research and compare" },
+  { title: "3. Keep control", body: "A purchase proposal must pass explicit rules. This demo does not connect checkout or move money.", state: "Approval remains with you" },
+];
+
 export function AgentHeroDemo() {
   const [prompt, setPrompt] = useState("");
   const [sent, setSent] = useState("");
   const [agent, setAgent] = useState("Shopping Agent");
   const [showAgents, setShowAgents] = useState(false);
-  const [toolOpen, setToolOpen] = useState(false);\n  const [tourStep, setTourStep] = useState(-1);\n  const [tourPlaying, setTourPlaying] = useState(false);\n  const tourScenes = [\n    { title: "1. Describe the task", body: "Tell the agent what you need, your budget, and the constraints it must respect.", state: "Request received" },\n    { title: "2. Review the options", body: "The workspace organises the next step and shows which sources or tools are actually available.", state: "Research and compare" },\n    { title: "3. Keep control", body: "A purchase proposal must pass explicit rules. This demo does not connect checkout or move money.", state: "Approval remains with you" },\n  ];\n  useEffect(() => {\n    if (!tourPlaying) return;\n    const timer = window.setInterval(() => {\n      setTourStep((current) => {\n        if (current >= tourScenes.length - 1) { setTourPlaying(false); return tourScenes.length - 1; }\n        return current + 1;\n      });\n    }, 2400);\n    return () => window.clearInterval(timer);\n  }, [tourPlaying]);\n  function startTour() { setTourStep(0); setTourPlaying(true); setSent(""); }
+  const [toolOpen, setToolOpen] = useState(false);
+  const [tourStep, setTourStep] = useState(-1);
+  const [tourPlaying, setTourPlaying] = useState(false);
+  useEffect(() => {
+    if (!tourPlaying) return;
+    const timer = window.setInterval(() => {
+      setTourStep((current) => {
+        if (current >= tourScenes.length - 1) { setTourPlaying(false); return tourScenes.length - 1; }
+        return current + 1;
+      });
+    }, 2400);
+    return () => window.clearInterval(timer);
+  }, [tourPlaying]);
+  function startTour() { setTourStep(0); setTourPlaying(true); setSent(""); }
 
   function submit(value = prompt) {
     const text = value.trim();
@@ -38,7 +57,13 @@ export function AgentHeroDemo() {
   return (
     <div className="relative w-full max-w-[570px] select-none">
       <div aria-hidden className="absolute -inset-5 rounded-[2rem] bg-[#315BFF]/10 blur-3xl" />
-      <div className="mb-3 flex items-center justify-between gap-3 px-1">\n        <div><p className="text-[10px] font-semibold uppercase tracking-[.18em] text-[#8FA4FF]">Product walkthrough</p><p className="mt-1 text-xs text-ivory/55">A 3-step guided preview</p></div>\n        <button type="button" onClick={() => tourPlaying ? setTourPlaying(false) : (tourStep >= 0 && tourStep < 2 ? setTourPlaying(true) : startTour())} className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-2 text-[11px] font-medium text-ivory transition hover:bg-white/10">\n          {tourPlaying ? <Pause size={12}/> : <Play size={12}/>} {tourPlaying ? "Pause" : tourStep >= 0 && tourStep < 2 ? "Resume walkthrough" : "Play walkthrough"}\n        </button>\n      </div>\n      <div className="relative overflow-hidden rounded-2xl border border-white/15 bg-[#fbfcff] text-[#182230] shadow-2xl shadow-black/30">
+      <div className="mb-3 flex items-center justify-between gap-3 px-1">
+        <div><p className="text-[10px] font-semibold uppercase tracking-[.18em] text-[#8FA4FF]">Product walkthrough</p><p className="mt-1 text-xs text-ivory/55">A 3-step guided preview</p></div>
+        <button type="button" onClick={() => tourPlaying ? setTourPlaying(false) : (tourStep >= 0 && tourStep < 2 ? setTourPlaying(true) : startTour())} className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-2 text-[11px] font-medium text-ivory transition hover:bg-white/10">
+          {tourPlaying ? <Pause size={12}/> : <Play size={12}/>} {tourPlaying ? "Pause" : tourStep >= 0 && tourStep < 2 ? "Resume walkthrough" : "Play walkthrough"}
+        </button>
+      </div>
+      <div className="relative overflow-hidden rounded-2xl border border-white/15 bg-[#fbfcff] text-[#182230] shadow-2xl shadow-black/30">
         <div className="flex items-center justify-between border-b border-[#e8ebf2] bg-white px-4 py-3">
           <div className="flex min-w-0 items-center gap-3">
             <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#edf1ff] text-[#315BFF]"><Sparkles size={17}/></div>
@@ -51,7 +76,12 @@ export function AgentHeroDemo() {
           <button onClick={() => setToolOpen(!toolOpen)} className={"flex items-center gap-1.5 rounded-lg border px-2.5 py-2 text-[11px] "+(toolOpen?"border-[#c8d4ff] bg-[#eef2ff] text-[#315BFF]":"border-[#e4e7ec] text-[#667085]")}><Wrench size={13}/> Tools <span className="rounded bg-[#f2f4f7] px-1">2</span></button>
         </div>
         {toolOpen && <div className="border-b border-[#e8ebf2] bg-[#f7f8fc] px-4 py-3"><p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#667085]">Example tool access</p><div className="flex flex-wrap gap-2"><span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-white px-2.5 py-1 text-[10px] text-emerald-700"><Check size={11}/> Web research · demo</span><span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-white px-2.5 py-1 text-[10px] text-amber-700"><Plug size={11}/> Live checkout · not connected</span></div></div>}
-        {tourStep >= 0 && <div className="border-b border-[#e8ebf2] bg-[#f4f6ff] px-4 py-3 sm:px-5">\n          <div className="mb-2 flex items-center justify-between gap-3"><p className="text-xs font-semibold text-[#1f3676]">{tourScenes[tourStep].title}</p><span className="text-[10px] text-[#667085]">{tourStep + 1} / {tourScenes.length}</span></div>\n          <p className="text-[11px] leading-5 text-[#52617e]">{tourScenes[tourStep].body}</p>\n          <div className="mt-3 flex gap-1.5">{tourScenes.map((scene, index) => <button key={scene.title} type="button" onClick={() => { setTourStep(index); setTourPlaying(false); }} aria-label={scene.title} className={`h-1.5 flex-1 rounded-full transition ${index <= tourStep ? "bg-[#315BFF]" : "bg-[#dbe2f4]"}`}/>)}</div>\n        </div>}\n        <div className="min-h-[330px] bg-[#fafbfe] px-4 py-4 sm:px-5">
+        {tourStep >= 0 && <div className="border-b border-[#e8ebf2] bg-[#f4f6ff] px-4 py-3 sm:px-5">
+          <div className="mb-2 flex items-center justify-between gap-3"><p className="text-xs font-semibold text-[#1f3676]">{tourScenes[tourStep].title}</p><span className="text-[10px] text-[#667085]">{tourStep + 1} / {tourScenes.length}</span></div>
+          <p className="text-[11px] leading-5 text-[#52617e]">{tourScenes[tourStep].body}</p>
+          <div className="mt-3 flex gap-1.5">{tourScenes.map((scene, index) => <button key={scene.title} type="button" onClick={() => { setTourStep(index); setTourPlaying(false); }} aria-label={scene.title} className={`h-1.5 flex-1 rounded-full transition ${index <= tourStep ? "bg-[#315BFF]" : "bg-[#dbe2f4]"}`}/>)}</div>
+        </div>}
+        <div className="min-h-[330px] bg-[#fafbfe] px-4 py-4 sm:px-5">
           {!sent ? <>
             <div className="mb-4 flex justify-end"><div className="max-w-[88%] rounded-2xl rounded-tr-md bg-[#eaf0ff] px-3.5 py-3 text-xs leading-5 text-[#24417f]">I want to find something useful. Can you help me compare options?</div></div>
             <div className="mb-4 flex items-start gap-2.5"><div className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-[#315BFF] text-white"><Sparkles size={13}/></div><div className="max-w-[90%] rounded-2xl rounded-tl-md border border-[#e8ebf2] bg-white px-3.5 py-3 text-xs leading-5 text-[#475467]">Of course. Tell me what you need and your budget. I’ll organise options, show what each tool can verify, and ask before taking any action.</div></div>
