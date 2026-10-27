@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
+import { PageGuide } from "@/components/ui/PageGuide";
 import {
   ArrowLeft, ArrowDownLeft, ArrowUpRight, CalendarClock, CreditCard,
   FileUp, Plus, Search, Trash2, Wallet, Repeat2, ReceiptText,
