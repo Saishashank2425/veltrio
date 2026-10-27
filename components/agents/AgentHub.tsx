@@ -9,6 +9,7 @@ import {
   Plus, Search, Send, Settings2, ShieldCheck, ShoppingBag, Sparkles,
   Store, ToggleLeft, ToggleRight, Wrench, X, Zap,
 } from "lucide-react";
+import { PageGuide } from "@/components/ui/PageGuide";
 
 type Agent = { id: string; name: string; kind: string; icon: string; description: string; tools: string[]; status: string };
 type ProductCard = { id: string; title: string; price: string | null; image: string | null; url: string; retailer: string | null; rating: number | null; reviews: number | null; delivery: string | null };
@@ -243,6 +244,8 @@ export default function AgentHub() {
               <button aria-label="More options" className="grid h-9 w-8 place-items-center text-[#98a2b3]"><MoreHorizontal size={18}/></button>
             </div>
           </header>
+
+          <PageGuide compact eyebrow="Agent workspace" title="What this page is for" purpose="Use the Hub to describe a task, choose an agent, and inspect which tools are available. It is a planning and research workspace; it does not place orders or move money." steps={["Choose an agent or start a new chat.", "State the goal, budget, and constraints.", "Review results and verify retailer details.", "Use Mandates and the Gateway demo to explore spending controls."]} note="Tool connections are limited in this prototype. Price monitoring, external account access, checkout, and payments are not active." links={[{ label: "Set spending rules", href: "/mandates" }, { label: "Test authorization", href: "/demo" }, { label: "Search products", href: "/shop" }]} />
 
           {activeView === "tools" ? <section className="mx-auto w-full max-w-4xl flex-1 overflow-y-auto px-7 py-9 max-sm:px-4">
             <div className="mb-7"><div className="mb-2 inline-flex items-center gap-2 rounded-full bg-[#eef2ff] px-3 py-1.5 text-xs font-medium text-[#315bff]"><Wrench size={13}/> Agent capabilities</div><h2 className="text-2xl font-semibold tracking-tight">Tools & integrations</h2><p className="mt-2 max-w-xl text-sm leading-6 text-[#667085]">Choose what this agent is allowed to use. A tool is only usable when its integration is connected and configured.</p></div>
