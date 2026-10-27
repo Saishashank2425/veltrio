@@ -16,7 +16,7 @@ type Conversation = { id: string; title: string; agentId: string; messages: Mess
 
 const defaultTools = [
   { id: "web", name: "Web research", description: "Search and read public webpages", icon: Globe, connected: true },
-  { id: "shopping", name: "Product search", description: "Find products and compare listings", icon: ShoppingBag, connected: false },
+  { id: "shopping", name: "Product search", description: "Search major retailer sites from the Veltrio Shop page", icon: ShoppingBag, connected: true },
   { id: "price", name: "Price tracking", description: "Monitor prices and target alerts", icon: Activity, connected: true },
   { id: "location", name: "Location", description: "Use a chosen address or ask permission for device location", icon: MapPin, connected: false },
   { id: "finance", name: "Finance records", description: "Read finance data saved in this browser", icon: CreditCard, connected: true },
@@ -41,7 +41,7 @@ const starterConversations: Conversation[] = [
   ] },
   { id: "headphones-chat", title: "Best headphones under ₹5,000", agentId: "headphones", updated: Date.now() - 100000, messages: [
     { id: "h1", role: "user", time: "Yesterday", text: "Help me find good headphones under ₹5,000." },
-    { id: "h2", role: "assistant", time: "Yesterday", text: "I can help compare sound, comfort, battery life, and noise cancellation. Product search is not connected yet, so I can’t verify live listings or current prices from this workspace." },
+    { id: "h2", role: "assistant", time: "Yesterday", text: "I can help compare sound, comfort, battery life, and noise cancellation. Product search is available from the Product search button. You can open retailer searches for live listings, then compare price and availability on the retailer site." },
   ] },
   { id: "subs-chat", title: "Review my subscriptions", agentId: "subscriptions", updated: Date.now() - 200000, messages: [
     { id: "s1", role: "user", time: "Mon", text: "Help me review recurring subscriptions." },
@@ -114,7 +114,7 @@ export default function AgentHub() {
       if (/pizza|domino|food|restaurant|margarita/.test(low)) {
         reply = "I can help prepare that order. First, I’d need a connected menu/ordering tool to verify item availability and the actual price. Which delivery address should I use? Choose a saved address if available, enter one manually, or grant location permission. No order has been placed, and payment is not connected.";
       } else if (/headphone|headset|earbud|earphone/.test(low)) {
-        reply = "I can compare comfort, sound, battery life, ANC, and warranty. Product search is not connected, so I can’t honestly show verified live listings yet. Enable a supported product-search tool in the right panel, or tell me your budget and must-have features to refine the criteria.";
+        reply = "I can compare comfort, sound, battery life, ANC, and warranty. Open Product search in the header to search Google Shopping, Amazon India, Flipkart, Croma, Reliance Digital, and Myntra. Veltrio opens retailer results in a new tab; it does not import or verify live prices and stock inside this app.";
         cards = false;
       } else if (/price|track|alert|cheaper|deal/.test(low)) {
         reply = "I can help define a target price and tracking criteria. Price alerts need a connected product source and notification channel; neither will be represented as active until connected. What product and target price should I prepare?";
