@@ -12,6 +12,7 @@ const navLinks = [
   { label: "Product search", href: "/shop" },
   { label: "Mandates", href: "/mandates" },
   { label: "Demo", href: "/demo" },
+  { label: "PayPal sandbox", href: "/checkout" },
   { label: "Finance", href: "/finance" },
 ];
 
