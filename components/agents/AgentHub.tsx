@@ -11,7 +11,8 @@ import {
 } from "lucide-react";
 
 type Agent = { id: string; name: string; kind: string; icon: string; description: string; tools: string[]; status: string };
-type Message = { id: string; role: "user" | "assistant"; text: string; cards?: boolean; time: string };
+type ProductCard = { id: string; title: string; price: string | null; image: string | null; url: string; retailer: string | null; rating: number | null; reviews: number | null; delivery: string | null };
+type Message = { id: string; role: "user" | "assistant"; text: string; products?: ProductCard[]; time: string };
 type Conversation = { id: string; title: string; agentId: string; messages: Message[]; updated: number };
 
 const defaultTools = [
@@ -128,7 +129,7 @@ export default function AgentHub() {
       const historyText = priorMessages.map((m) => m.text).join(" ").toLowerCase();
       const isFollowUp = /\b(it|that|those|them|which one|the first|the second|compare|best one|more details)\b/.test(low);
       let reply = "";
-      let cards = false;
+      let productCards: ProductCard[] | undefined;
 
       const budgetMatch = clean.match(/(?:under|below|less than|within|budget(?: of)?|₹|rs\.?\s*)(?:₹|rs\.?\s*)?([\d,]+(?:\.\d+)?)\s*(k|thousand)?/i);
       const budget = budgetMatch ? Number(budgetMatch[1].replace(/,/g, "")) * (/^(k|thousand)$/i.test(budgetMatch[2] || "") ? 1000 : 1) : undefined;
@@ -170,11 +171,8 @@ export default function AgentHub() {
             const intro = budget
               ? `I found ${results.length} product listing(s) that match your search and budget of ₹${budget.toLocaleString("en-IN")}. Here's a quick shortlist:`
               : `I found ${results.length} product listing(s) for your search. Here's a quick shortlist:`;
-            const list = results.slice(0, 5).map((p: { title?: string; price?: string | null; retailer?: string | null; rating?: number | null; url?: string }) =>
-              `• ${p.title || "Product"} — ${p.price || "price not listed"}${p.retailer ? ` at ${p.retailer}` : ""}${p.rating ? ` · rating ${p.rating}` : ""}${p.url ? `\n  ${p.url}` : ""}`
-            ).join("\n");
-            reply = `${intro}\n\n${list}\n\nPrices and availability can change; confirm the final details with the retailer. Tell me what matters most—design, fitness features, battery, durability, or value—and I'll compare the shortlist around that.`;
-            cards = true;
+            productCards = results.slice(0, 6).map((p: ProductCard, index: number) => ({ ...p, id: p.id || `${index}-${p.title}` }));
+            reply = `${intro} I’ve displayed the listings as product cards below, including images where the provider supplies them. Prices and availability can change, so confirm the final details with the retailer. Tell me what matters most—design, comfort, durability, or value—and I’ll compare the shortlist around that.`;
           } else {
             reply = `I understand you're looking for ${query || "a product"}${budget ? ` under ₹${budget.toLocaleString("en-IN")}` : ""}. ${typeof data.message === "string" ? data.message : "Live product results aren't available from the connected source right now."} You can still open Product search to search retailer listings. If you share your top priorities, I'll help you compare the specifications and trade-offs without inventing prices or ratings.`;
           }
@@ -187,7 +185,7 @@ export default function AgentHub() {
         reply = "I understood your request, but the connected product search couldn't be reached just now. You can retry from Product search. I won't make up live prices, ratings, availability, or claim that an action was completed.";
       }
 
-      const assistantMessage: Message = { id: id(), role: "assistant", text: reply, time: now(), cards };
+      const assistantMessage: Message = { id: id(), role: "assistant", text: reply, time: now(), products: productCards };
       patchConversation(active.id, (c) => ({ ...c, messages: [...c.messages, assistantMessage], updated: Date.now() }));
       setStatus("Waiting for you");
     }, 250);
@@ -254,7 +252,7 @@ export default function AgentHub() {
                 {active.messages.length === 0 && <div className="flex flex-1 flex-col items-center justify-center py-16 text-center"><span className="mb-5 grid h-14 w-14 place-items-center rounded-2xl bg-[#eef2ff] text-[#315bff]"><Sparkles size={26}/></span><h2 className="text-3xl font-semibold tracking-tight max-sm:text-2xl">What can I help you with?</h2><p className="mt-3 max-w-lg text-sm leading-6 text-[#667085]">Choose an agent or describe a task. You’ll see options in the conversation and stay in control of every action.</p><div className="mt-8 grid w-full max-w-2xl gap-3 sm:grid-cols-2">{[{icon:ShoppingBag,title:"Find the right product",sub:"Compare options and prices",text:"Help me compare headphones under ₹5,000"},{icon:Store,title:"Plan a food order",sub:"Check details before ordering",text:"Help me order a Margherita pizza with extra cheese"},{icon:CreditCard,title:"Review subscriptions",sub:"Understand recurring costs",text:"Help me review my subscriptions"},{icon:Compass,title:"Research something",sub:"Explore options and trade-offs",text:"Research the best options for me"}].map((s)=>{const Icon=s.icon;return <button key={s.title} onClick={()=>sendMessage(s.text)} className="flex items-start gap-3 rounded-2xl border border-[#e4e7ec] bg-white p-4 text-left transition hover:border-[#c6d2ff] hover:shadow-sm"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#f4f6fa] text-[#475467]"><Icon size={17}/></span><span><span className="block text-sm font-medium">{s.title}</span><span className="mt-1 block text-xs text-[#98a2b3]">{s.sub}</span></span></button>})}</div></div>}
                 {active.messages.map((m) => <div key={m.id} className={"flex gap-3 py-5 " + (m.role === "user" ? "justify-end" : "justify-start")}>
                   {m.role === "assistant" && <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[#315bff] text-white"><Sparkles size={15}/></span>}
-                  <div className={"max-w-[min(100%,680px)] " + (m.role === "user" ? "order-first" : "")}><div className={"rounded-2xl px-4 py-3 text-[14px] leading-6 " + (m.role === "user" ? "rounded-tr-md bg-[#edf2ff] text-[#1f3676]" : "rounded-tl-md border border-[#e9edf2] bg-white text-[#344054]")}>{m.text}</div>{m.role === "assistant" && <div className="mt-2 flex items-center gap-3 px-1 text-[10px] text-[#98a2b3]"><span>{m.time}</span><span>·</span><span>Veltrio agent</span></div>}</div>
+                  <div className={"max-w-[min(100%,680px)] " + (m.role === "user" ? "order-first" : "")}><div className={"rounded-2xl px-4 py-3 text-[14px] leading-6 " + (m.role === "user" ? "rounded-tr-md bg-[#edf2ff] text-[#1f3676]" : "rounded-tl-md border border-[#e9edf2] bg-white text-[#344054]")}>{m.text}</div>{m.role === "assistant" && m.products && m.products.length > 0 && <div className="mt-3 grid gap-3 sm:grid-cols-2">{m.products.map((product) => <article key={product.id} className="overflow-hidden rounded-xl border border-[#e5e9f0] bg-white shadow-sm"><div className="flex h-36 items-center justify-center bg-[#f8fafc] p-3">{product.image ? <img src={product.image} alt={product.title} loading="lazy" referrerPolicy="no-referrer" onError={(event) => { event.currentTarget.style.display = "none"; }} className="max-h-full max-w-full object-contain" /> : <div className="flex flex-col items-center gap-2 text-xs text-[#98a2b3]"><ShoppingBag size={24}/><span>Image unavailable</span></div>}</div><div className="p-3"><h3 className="line-clamp-2 min-h-10 text-xs font-semibold leading-5 text-[#172033]">{product.title}</h3><p className="mt-2 text-base font-bold text-[#172033]">{product.price || "Price unavailable"}</p><p className="mt-1 text-[11px] text-[#667085]">{product.retailer || "Retailer"}{product.rating ? ` · ★ ${product.rating.toFixed(1)}` : ""}{product.reviews ? ` (${product.reviews.toLocaleString()} reviews)` : ""}</p>{product.delivery && <p className="mt-1 text-[11px] text-[#667085]">{product.delivery}</p>}<a href={product.url} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-[#315bff] px-3 text-xs font-semibold text-white hover:bg-[#2446d8]">View product <ExternalLink size={13}/></a></div></article>)}</div>}{m.role === "assistant" && <div className="mt-2 flex items-center gap-3 px-1 text-[10px] text-[#98a2b3]"><span>{m.time}</span><span>·</span><span>Veltrio agent</span></div>
                   {m.role === "user" && <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#e4e7ec] text-xs font-semibold text-[#475467]">You</span>}
                 </div>)}
                 {status === "Researching" && <div className="flex items-center gap-3 py-4"><span className="grid h-8 w-8 place-items-center rounded-xl bg-[#eef2ff] text-[#315bff]"><Sparkles size={15}/></span><div className="flex items-center gap-2 rounded-xl border border-[#e9edf2] bg-white px-4 py-3 text-xs text-[#667085]"><span className="flex gap-1"><i className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#315bff]"/><i className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#315bff] [animation-delay:120ms]"/><i className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#315bff] [animation-delay:240ms]"/></span>Thinking through your request…</div></div>}
