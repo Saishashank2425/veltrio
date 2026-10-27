@@ -37,7 +37,8 @@ function parseMandate(raw: string): ParsedMandate {
   const monthlyMatch = text.match(/(?:monthly|per month|each month|month(?:ly)? budget)[^₹$\d]{0,25}(?:₹|rs\.?\s*|inr\s*|\$\s*)?([\d,]+(?:\.\d+)?)/i);
   const monthlyBudget = monthlyMatch ? Number(monthlyMatch[1].replace(/,/g, "")) : null;
   const capMatch = text.match(/(?:per transaction|per purchase|single purchase|each purchase|one purchase|transaction cap|purchase limit|limit(?: of)?|up to|under|below|less than|maximum|max(?:imum)?)[^₹$\d]{0,28}(?:₹|rs\.?\s*|inr\s*|\$\s*)?([\d,]+(?:\.\d+)?)/i);
-  const trailingCapMatch = text.match(/(?:₹|rs\\.?\\s*|inr\\s*|\\$\\s*)([\\d,]+(?:\\.\\d+)?)\\s*(?:per transaction|per purchase|each purchase|single purchase)/i);\n  const maxPerTransaction = capMatch ? Number(capMatch[1].replace(/,/g, "")) : trailingCapMatch ? Number(trailingCapMatch[1].replace(/,/g, "")) : (allAmounts.length === 1 && !monthlyMatch && !approvalMatch ? first : null);
+  const trailingCapMatch = text.match(/(?:₹|rs\.?\s*|inr\s*|\$\s*)([\d,]+(?:\.\d+)?)\s*(?:per transaction|per purchase|each purchase|single purchase)/i);
+  const maxPerTransaction = capMatch ? Number(capMatch[1].replace(/,/g, "")) : trailingCapMatch ? Number(trailingCapMatch[1].replace(/,/g, "")) : (allAmounts.length === 1 && !monthlyMatch && !approvalMatch ? first : null);
   const expiresMatch = text.match(/(?:expire|expires|valid for|for)\s*(\d+)\s*(day|days|week|weeks|month|months)/i);
   const expiresInDays = expiresMatch ? Number(expiresMatch[1]) * (/week/i.test(expiresMatch[2]) ? 7 : /month/i.test(expiresMatch[2]) ? 30 : 1) : null;
 
