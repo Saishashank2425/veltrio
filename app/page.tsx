@@ -22,12 +22,13 @@ export default function Home() {
               <h2 id="workspace-heading" className="mt-3 text-3xl font-semibold tracking-tight text-ivory sm:text-4xl">One clear purpose for every workspace.</h2>
               <p className="mt-4 text-sm leading-6 text-ivory/60 sm:text-base">Research options, write down your spending rules, and test how a policy decision is made. Each page explains what it does and what is still a prototype.</p>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {[
                 { href: "/agents", number: "01", title: "Agent Hub", desc: "Start a task, research products, and inspect available tools.", action: "Open workspace", Icon: Search },
                 { href: "/shop", number: "02", title: "Product search", desc: "Search listings and verify final details with the retailer.", action: "Compare options", Icon: SlidersHorizontal },
                 { href: "/mandates", number: "03", title: "Spending mandates", desc: "Draft limits, merchant rules, and approval thresholds for review.", action: "Draft a mandate", Icon: ShieldCheck },
                 { href: "/demo", number: "04", title: "Gateway demo", desc: "Submit a sample proposal and inspect ALLOW, BLOCK, or ESCALATE.", action: "Test a decision", Icon: WalletCards },
+                { href: "/finance", number: "05", title: "Finance workspace", desc: "Organise transactions, subscriptions, cards, EMIs, and bills locally.", action: "Review records", Icon: WalletCards },
               ].map(({ href, number, title, desc, action, Icon }) => (
                 <Link key={href} href={href} className="group flex min-h-[230px] flex-col rounded-2xl border border-white/10 bg-white/[.035] p-5 transition duration-200 hover:-translate-y-1 hover:border-[#315BFF]/50 hover:bg-white/[.06]">
                   <div className="flex items-center justify-between">
@@ -40,8 +41,6 @@ export default function Home() {
                 </Link>
               ))}
             </div>
-            <p className="mt-5 text-xs leading-5 text-ivory/35">Finance workspace: keep a manual, browser-local record of transactions and recurring obligations. No bank connection is active.</p>
-            <div className="mt-3"><Link href="/finance" className="inline-flex items-center gap-2 text-sm font-medium text-ivory/70 transition hover:text-white">Open finance workspace <ArrowRight size={15}/></Link></div>
           </div>
         </section>
         <ProblemBridge />
