@@ -59,6 +59,22 @@ test("rejects missing fields, non-positive amounts and non-finite amounts", () =
   assert.equal(gateway.validateProposal({}).ok, false);
   assert.equal(gateway.validateProposal(proposal({ amount: 0 })).ok, false);
   assert.equal(gateway.validateProposal(proposal({ amount: Infinity })).ok, false);
+  assert.equal(gateway.validateProposal(proposal({ amount: NaN })).ok, false);
+});
+
+test("rejects malformed text fields instead of coercing objects to strings", () => {
+  assert.equal(gateway.validateProposal(proposal({ vendor: { name: "Staples" } })).ok, false);
+  assert.equal(gateway.validateProposal(proposal({ description: "   " })).ok, false);
+  assert.equal(gateway.validateProposal(proposal({ agent: 42 })).ok, false);
+});
+
+test("rejects unsupported currencies and non-boolean policy flags", () => {
+  assert.equal(gateway.validateProposal(proposal({ currency: "EUR" })).ok, false);
+  assert.equal(gateway.validateProposal(proposal({ isSubscription: "false" })).ok, false);
+  assert.equal(gateway.validateProposal(proposal({ isNewVendor: 0 })).ok, false);
+  const valid = gateway.validateProposal(proposal({ currency: "USD", isSubscription: false }));
+  assert.equal(valid.ok, true);
+  if (valid.ok) assert.equal(valid.proposal.currency, "USD");
 });
 test("caps audit history at 50 records", () => {
   for (let i = 0; i < 55; i++) gateway.authorize(proposal({ description: `Purchase ${i}` }));
