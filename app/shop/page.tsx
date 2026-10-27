@@ -62,7 +62,7 @@ export default function ShopPage() {
           </div>
         </form>
 
-        {!searched && <div className="mx-auto mt-4 flex max-w-3xl flex-wrap items-center justify-center gap-2"><span className="mr-1 text-xs text-[#98a2b3]">Try:</span>{suggestions.map((suggestion)=><button key={suggestion} onClick={()=>{setQuery(suggestion);setSearched(true);}} className="rounded-full border border-[#e4e7ec] bg-white px-3 py-1.5 text-xs text-[#667085] transition hover:border-[#c6d2ff] hover:text-[#315bff]}>{suggestion}</button>)}</div>}
+        {!searched && <div className="mx-auto mt-4 flex max-w-3xl flex-wrap items-center justify-center gap-2"><span className="mr-1 text-xs text-[#98a2b3]">Try:</span>{suggestions.map((suggestion)=><button key={suggestion} onClick={()=>{setQuery(suggestion);setSearched(true);}} className="rounded-full border border-[#e4e7ec] bg-white px-3 py-1.5 text-xs text-[#667085] transition hover:border-[#c6d2ff] hover:text-[#315bff]"}>{suggestion}</button>)}</div>}
 
         {searched && <section className="mt-10">
           <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end"><div><p className="text-xs font-semibold uppercase tracking-[.14em] text-[#315bff]">Search destinations</p><h2 className="mt-1 text-xl font-semibold">Results for “{activeQuery}”</h2><p className="mt-1 text-sm text-[#667085]">Choose a store to open its search results.</p></div><div className="flex flex-wrap gap-2">{["All","Electronics","Fashion","Other"].map((item)=><button key={item} onClick={()=>setCategory(item)} className={"rounded-full px-3 py-1.5 text-xs font-medium "+(category===item?"bg-[#172033] text-white":"border border-[#e4e7ec] bg-white text-[#667085] hover:border-[#cbd5e1]")}>{item}</button>)}</div></div>
