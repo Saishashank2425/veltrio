@@ -40,23 +40,96 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Budget must be a positive amount up to ₹1,00,00,000." }, { status: 400 });
   }
 
-  const apiKey = process.env.SERPAPI_API_KEY;
-  if (!apiKey) {
+  const channel3Key = process.env.CHANNEL3_API_KEY;
+  const serpApiKey = process.env.SERPAPI_API_KEY;
+
+  // Channel3 is the hackathon's product-data sponsor and is preferred when configured.
+  // SerpApi remains an optional fallback for existing deployments.
+  if (!channel3Key && !serpApiKey) {
     return NextResponse.json({
       configured: false,
-      provider: "Google Shopping via SerpApi",
+      provider: null,
       results: [],
-      message: "Live product data is not configured yet. Add SERPAPI_API_KEY to the Render service environment to show product cards with current retailer listings.",
+      message: "Live product data is not configured. Add CHANNEL3_API_KEY in Render for Channel3's structured shopping catalog. SERPAPI_API_KEY remains supported as a fallback.",
+      setup: {
+        primary: "https://trychannel3.com/developers",
+        fallback: "https://serpapi.com/",
+      },
     }, { status: 200, headers: { "Cache-Control": "no-store" } });
   }
 
   try {
+    if (channel3Key) {
+      const response = await fetch("https://api.trychannel3.com/v1/search", {
+        method: "POST",
+        headers: {
+          "x-api-key": channel3Key,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ query, limit: 24 }),
+        signal: AbortSignal.timeout(12000),
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        console.error("Channel3 returned HTTP", response.status);
+        // If Channel3 is configured but temporarily unavailable, don't silently mask
+        // the failure by charging another provider or returning stale-looking results.
+        return NextResponse.json({ error: "Channel3 product search is temporarily unavailable. Please retry shortly." }, { status: 502 });
+      }
+
+      const data: Record<string, unknown> = await response.json();
+      const products = (Array.isArray(data.products) ? data.products : Array.isArray(data.results) ? data.results : []) as Array<Record<string, unknown>>;
+      const results: ShoppingResult[] = products.flatMap((item, index) => {
+        const title = typeof item.title === "string" ? item.title.trim() : typeof item.name === "string" ? item.name.trim() : "";
+        const offers = Array.isArray(item.offers) ? item.offers as Array<Record<string, unknown>> : [];
+        const offer = offers[0] ?? {};
+        const rawPriceObject = offer.price && typeof offer.price === "object" ? offer.price as Record<string, unknown> : {};
+        const rawPrice = rawPriceObject.price ?? offer.price ?? item.price;
+        const parsed = parsePrice(rawPrice);
+        const rawUrl = typeof offer.url === "string" ? offer.url : typeof item.url === "string" ? item.url : "";
+        if (!title || !/^https:\/\//i.test(rawUrl)) return [];
+        const rawImages = Array.isArray(item.images) ? item.images : [];
+        const firstImage = rawImages[0];
+        const imageValue = typeof item.image === "string" ? item.image : typeof firstImage === "string" ? firstImage : firstImage && typeof firstImage === "object" ? (firstImage as Record<string, unknown>).url : null;
+        const image = typeof imageValue === "string" && /^https:\/\//i.test(imageValue) ? imageValue : null;
+        const website = offer.website && typeof offer.website === "object" ? offer.website as Record<string, unknown> : {};
+        const retailer = typeof offer.merchant === "string" ? offer.merchant : typeof website.name === "string" ? website.name : typeof item.brand === "string" ? item.brand : null;
+        const currency = typeof rawPriceObject.currency === "string" ? rawPriceObject.currency.toUpperCase() : parsed.currency;
+        const price = parsed.label;
+        const ratingRaw = Number(item.rating);
+        const reviewsRaw = Number(item.reviews);
+        return [{
+          id: typeof item.id === "string" ? item.id : `channel3-${index}-${title.slice(0, 32)}`,
+          title,
+          price,
+          amount: parsed.amount,
+          currency,
+          image,
+          url: rawUrl,
+          retailer,
+          rating: Number.isFinite(ratingRaw) && ratingRaw > 0 ? ratingRaw : null,
+          reviews: Number.isFinite(reviewsRaw) && reviewsRaw > 0 ? reviewsRaw : null,
+          delivery: null,
+        }];
+      });
+      const filtered = budget ? results.filter((item) => item.amount !== null && item.currency === "INR" && item.amount <= budget) : results;
+      return NextResponse.json({
+        configured: true,
+        provider: "Channel3",
+        query,
+        count: filtered.length,
+        results: filtered,
+        note: "Product data is provided by Channel3. Prices, stock, and merchant offers may change; verify the final details with the retailer.",
+      }, { headers: { "Cache-Control": "no-store" } });
+    }
+
     const url = new URL("https://serpapi.com/search.json");
     url.searchParams.set("engine", "google_shopping");
     url.searchParams.set("q", query);
     url.searchParams.set("gl", "in");
     url.searchParams.set("hl", "en");
-    url.searchParams.set("api_key", apiKey);
+    url.searchParams.set("api_key", serpApiKey!);
     url.searchParams.set("num", "24");
 
     const response = await fetch(url, { signal: AbortSignal.timeout(10000), cache: "no-store" });
@@ -93,7 +166,7 @@ export async function GET(request: NextRequest) {
     const filtered = budget ? results.filter((item) => item.amount !== null && item.currency === "INR" && item.amount <= budget) : results;
     return NextResponse.json({
       configured: true,
-      provider: "Google Shopping via SerpApi",
+      provider: "Google Shopping via SerpApi (fallback)",
       query,
       count: filtered.length,
       results: filtered,
