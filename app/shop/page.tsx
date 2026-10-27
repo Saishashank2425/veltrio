@@ -25,7 +25,11 @@ export default function ShopPage() {
   const [budget, setBudget] = useState("");
   const [category, setCategory] = useState("All");
   const [searched, setSearched] = useState(false);
-  const [products, setProducts] = useState<ProductResult[]>([]);\n  const [loading, setLoading] = useState(false);\n  const [searchError, setSearchError] = useState("");\n  const [providerMessage, setProviderMessage] = useState("");\n  const [providerConfigured, setProviderConfigured] = useState(false);
+  const [products, setProducts] = useState<ProductResult[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searchError, setSearchError] = useState("");
+  const [providerMessage, setProviderMessage] = useState("");
+  const [providerConfigured, setProviderConfigured] = useState(false);
 
   const activeQuery = useMemo(() => {
     const parts = [query.trim(), budget.trim() ? `under ₹${budget.trim()}` : ""].filter(Boolean);
