@@ -9,25 +9,25 @@ const principles = [
     icon: Lock,
     title: "Deterministic, not probabilistic",
     description:
-      "Rules execute exactly as written. A \$500 limit means \$500 — not \$499.99 and not \$501 under 'extenuating circumstances.' No model is consulted at authorization time.",
+      "The gateway demo evaluates structured proposals with deterministic conditions. It does not rely on a language model to make the final sample decision.",
   },
   {
     icon: Users,
     title: "You set the rules. We enforce them.",
     description:
-      "Veltrio has no discretion over what gets authorized. The system runs your policy, not its own judgment. If a rule doesn't exist for a case, the decision defaults to blocked.",
+      "The intended design is to evaluate a configured policy rather than invent a reason to spend. The current demo uses sample policy rules; saved mandate drafts are not connected to it.",
   },
   {
     icon: BookOpen,
     title: "Full audit trail",
     description:
-      "Every decision — approved or blocked — is logged with the exact rule evaluated, the values compared, the outcome, and a machine-readable reason code. Disputes are resolvable.",
+      "The demo exposes decision reasons and an in-memory audit trail. Durable storage, identity, and production audit controls are not yet implemented.",
   },
   {
     icon: Cpu,
     title: "Agent-agnostic",
     description:
-      "Veltrio is a gateway, not a platform. It works with any AI agent that can make an HTTP request. No proprietary SDK required. Agents submit proposals; Veltrio decides.",
+      "The gateway API is designed to accept structured HTTP proposals. Production integrations, credentials, payment providers, and external agent onboarding are not connected in this prototype.",
   },
 ];
 
@@ -39,11 +39,10 @@ export function TrustSection() {
         <div className="text-center mb-16">
           <SectionLabel light>Principles</SectionLabel>
           <h2 className="text-4xl sm:text-5xl font-bold text-ivory tracking-tight">
-            Built on four guarantees.
+            Four principles behind the design.
           </h2>
           <p className="mt-4 text-ivory/50 max-w-md mx-auto text-base">
-            Not promises. Not marketing claims. Four properties you can verify
-            in the code.
+            These are the intended properties of the authorization layer. This hackathon prototype demonstrates selected behaviours; it is not a production payment security product.
           </p>
         </div>
 
