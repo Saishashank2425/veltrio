@@ -15,6 +15,13 @@ The Shop page can display product cards with images, prices, retailer names, rat
 
 The provider may return incomplete or changing prices, ratings, and availability. Veltrio does not guarantee listing accuracy and does not place orders or authorize payments through product search. The optional provider has its own pricing, quotas, and terms.
 
+## Commerce agent and spending mandates
+
+- **Agent Hub:** intent-aware commerce replies route product discovery to product search and mandate requests to the mandate builder. Tool availability is labelled honestly; unconfigured integrations are not represented as active.
+- **Spending mandates:** describe purchase rules in plain language to create a structured draft with a per-purchase cap, monthly budget, currency, approval threshold, expiry, referenced categories, blocked categories, and merchant restrictions. Review the extracted values before saving.
+- **Mandate storage and enforcement:** saved mandates currently live in the browser's local storage. The parser is deterministic pattern-based extraction, not an LLM, and saved mandates are not yet wired into the authorization gateway. Do not rely on them to enforce real transactions.
+- **Product search:** server-side Google Shopping results require `SERPAPI_API_KEY`. Budget-filtered results include only listings with a parseable INR price at or below the specified budget; unpriced or non-INR listings are excluded from a budget-filtered shortlist.
+
 ## Product surfaces
 
 - **Landing page:** product overview, policy flow and security principles.
