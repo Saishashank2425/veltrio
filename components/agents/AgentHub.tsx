@@ -16,8 +16,8 @@ type Conversation = { id: string; title: string; agentId: string; messages: Mess
 
 const defaultTools = [
   { id: "web", name: "Web research", description: "Search and read public webpages", icon: Globe, connected: true },
-  { id: "shopping", name: "Product search", description: "Search major retailer sites from the Veltrio Shop page", icon: ShoppingBag, connected: true },
-  { id: "price", name: "Price tracking", description: "Monitor prices and target alerts", icon: Activity, connected: true },
+  { id: "shopping", name: "Product search", description: "Retailer search; live comparison results require the configured provider", icon: ShoppingBag, connected: true },
+  { id: "price", name: "Price tracking", description: "Target-price planning; automatic monitoring is not configured", icon: Activity, connected: false },
   { id: "location", name: "Location", description: "Use a chosen address or ask permission for device location", icon: MapPin, connected: false },
   { id: "finance", name: "Finance records", description: "Read finance data saved in this browser", icon: CreditCard, connected: true },
   { id: "notify", name: "Notifications", description: "Prepare alerts for supported channels", icon: Zap, connected: false },
