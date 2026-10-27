@@ -2,16 +2,12 @@ import Link from "next/link";
 
 const footerLinks = [
   { label: "How it works", href: "/#how-it-works" },
-  { label: "Product search", href: "/shop" },
-  { label: "Agent Hub", href: "/agents" },
-  { label: "Spending mandates", href: "/mandates" },
-  { label: "Finance workspace", href: "/finance" },
   { label: "Agent Hub", href: "/agents" },
   { label: "Product search", href: "/shop" },
   { label: "Spending mandates", href: "/mandates" },
-  { label: "Finance workspace", href: "/finance" },
   { label: "Authorization demo", href: "/demo" },
-  { label: "Trust & Security", href: "#trust" },
+  { label: "Finance workspace", href: "/finance" },
+  { label: "Trust & security", href: "/#trust" },
 ];
 
 export function Footer() {
