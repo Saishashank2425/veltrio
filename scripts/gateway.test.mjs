@@ -45,7 +45,7 @@ test("escalates when projected travel spend slightly exceeds its budget", () => 
   assert.equal(result.triggeringRule?.ruleId, "R004");
 });
 test("blocks when projected category spend exceeds 110% of budget", () => {
-  gateway.monthlySpend["Operating Expenses"] = 5300;
+  gateway.monthlySpend["Operating Expenses"] = 5301;
   const result = gateway.authorize(proposal({ vendor: "Staples", category: "Operating Expenses", amount: 200 }));
   assert.equal(result.decision, "BLOCK");
   assert.equal(result.triggeringRule?.ruleId, "R004");
