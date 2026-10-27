@@ -46,7 +46,7 @@ export function AgentHeroDemo() {
     <div className="relative w-full max-w-[570px] select-none">
       <div aria-hidden className="absolute -inset-5 rounded-[2rem] bg-[#315BFF]/10 blur-3xl" />
       <div className="mb-3 flex items-center justify-between gap-3 px-1">
-        <div><p className="text-[10px] font-semibold uppercase tracking-[.18em] text-[#8FA4FF]">Product walkthrough</p><p className="mt-1 text-xs text-ivory/55">A 3-step guided preview</p></div>
+        <div><p className="text-[10px] font-semibold uppercase tracking-[.18em] text-[#8FA4FF]">How Agent Hub works</p><p className="mt-1 text-xs text-ivory/55">A 3-step guided preview</p></div>
         <button type="button" onClick={() => tourPlaying ? setTourPlaying(false) : (tourStep >= 0 && tourStep < 2 ? setTourPlaying(true) : startTour())} className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-2 text-[11px] font-medium text-ivory transition hover:bg-white/10">
           {tourPlaying ? <Pause size={12}/> : <Play size={12}/>} {tourPlaying ? "Pause" : tourStep >= 0 && tourStep < 2 ? "Resume walkthrough" : "Play walkthrough"}
         </button>
