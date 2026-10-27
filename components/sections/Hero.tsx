@@ -124,6 +124,9 @@ export function Hero() {
                   See how it works
                 </Button>
               </a>
+              <Link href="/agents" className="inline-flex items-center gap-2 self-center px-1 text-sm font-medium text-ivory/70 transition hover:text-ivory">
+                Open Agent Hub <ArrowRight className="h-4 w-4" />
+              </Link>
             </motion.div>
 
             <p className="mt-5 max-w-md text-xs leading-5 text-ivory/35">Prototype status: the gateway evaluates demo proposals. Merchant checkout and real payment execution are not connected.</p>
