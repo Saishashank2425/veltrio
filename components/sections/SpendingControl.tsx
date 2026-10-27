@@ -107,7 +107,7 @@ export function SpendingControl() {
         <div className="mb-14">
           <SectionLabel light>Spending Control</SectionLabel>
           <h2 className="text-4xl sm:text-5xl font-bold text-ivory tracking-tight max-w-xl">
-            Your rules. Enforced exactly.
+            Rules that can be inspected.
           </h2>
           <p className="mt-4 text-ivory/50 max-w-lg text-base">
             Define the constraints once. Every agent — every transaction —
