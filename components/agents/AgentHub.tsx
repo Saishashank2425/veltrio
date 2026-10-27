@@ -27,14 +27,10 @@ const defaultTools = [
 ];
 
 const starterAgents: Agent[] = [
-  { id: "shopping", name: "Shopping Agent", kind: "Shopping", icon: "SH", description: "Find products, compare options, and track prices.", tools: ["web", "shopping", "price"], status: "Ready" },
-  { id: "amazon", name: "Amazon Agent", kind: "Shopping", icon: "AM", description: "Explore Amazon listings and compare products.", tools: ["web", "shopping", "price"], status: "Tools not connected" },
-  { id: "flipkart", name: "Flipkart Agent", kind: "Shopping", icon: "FK", description: "Find deals and compare Flipkart products.", tools: ["web", "shopping", "price"], status: "Tools not connected" },
-  { id: "headphones", name: "Headphone Finder", kind: "Shopping", icon: "HF", description: "Match headphones to your budget and needs.", tools: ["web", "shopping", "price"], status: "Ready" },
-  { id: "food", name: "Food Agent", kind: "Food & delivery", icon: "FD", description: "Explore menus, customise meals, and prepare orders.", tools: ["web", "location"], status: "Tools not connected" },
-  { id: "subscriptions", name: "Subscription Agent", kind: "Finance", icon: "SUB", description: "Track renewals and recurring subscriptions.", tools: ["finance", "notify"], status: "Ready" },
-  { id: "stocks", name: "Stock Market Agent", kind: "Investing", icon: "INV", description: "Research stocks and create watchlists or simulated orders.", tools: ["web", "notify"], status: "Research only" },
-  { id: "finance", name: "Finance Agent", kind: "Finance", icon: "FIN", description: "Understand spending, bills, EMIs, and upcoming payments.", tools: ["finance"], status: "Ready" },
+  { id: "shopping", name: "Product Research", kind: "Commerce", icon: "PR", description: "Compare product options against your budget and requirements.", tools: ["shopping"], status: "Ready" },
+  { id: "purchase", name: "Purchase Planner", kind: "Commerce", icon: "PP", description: "Turn a shortlist into a review checklist and spending-rule draft.", tools: ["shopping"], status: "Ready" },
+  { id: "subscriptions", name: "Spend Review", kind: "Finance", icon: "SR", description: "Organise subscription, bill, and recurring-cost records saved in this browser.", tools: ["finance"], status: "Ready" },
+  { id: "finance", name: "Finance Organizer", kind: "Finance", icon: "FO", description: "Review local income, expenses, bills, cards, and EMIs.", tools: ["finance"], status: "Ready" },
 ];
 
 const starterConversations: Conversation[] = [
@@ -69,8 +65,9 @@ export default function AgentHub() {
         const saved = JSON.parse(raw);
         if (Array.isArray(saved.conversations) && saved.conversations.length) setConversations(saved.conversations);
         if (Array.isArray(saved.agents) && saved.agents.length) {
-          const iconById: Record<string, string> = { shopping: "SH", amazon: "AM", flipkart: "FK", headphones: "HF", food: "FD", subscriptions: "SB", stocks: "IV", finance: "FN" };
-          setAgents(saved.agents.map((item: Agent) => ({ ...item, icon: iconById[item.id] ?? (/^[A-Z]{1,3}$/.test(item.icon) ? item.icon : "CA") })));
+          const iconById: Record<string, string> = { shopping: "PR", purchase: "PP", subscriptions: "SR", finance: "FO" };
+          const focusedAgents = saved.agents.filter((item: Agent) => ["shopping", "purchase", "subscriptions", "finance"].includes(item.id) || item.kind === "Custom");
+          setAgents(focusedAgents.map((item: Agent) => ({ ...item, icon: iconById[item.id] ?? (/^[A-Z]{1,3}$/.test(item.icon) ? item.icon : "CA") })));
         }
       }
     } catch { /* keep starter data if local storage is unavailable */ }
@@ -235,7 +232,7 @@ export default function AgentHub() {
             </div>
           </header>
 
-          <PageGuide compact eyebrow="Agent workspace" title="What this page is for" purpose="Use the Hub to describe a task, choose an agent, and inspect which tools are available. It is a planning and research workspace; it does not place orders or move money." steps={["Choose an agent or start a new chat.", "State the goal, budget, and constraints.", "Review results and verify retailer details.", "Use Mandates and the Gateway demo to explore spending controls."]} note="Tool connections are limited in this prototype. Price monitoring, external account access, checkout, and payments are not active." links={[{ label: "Set spending rules", href: "/mandates" }, { label: "Test authorization", href: "/demo" }, { label: "Search products", href: "/shop" }]} />
+          <PageGuide compact eyebrow="Agent workspace" title="What this page is for" purpose="Use the Hub for product research, purchase planning, and reviewing local spending records. Each agent has a narrow role; the workspace helps you prepare a decision rather than pretending to execute a transaction." steps={["Choose an agent or start a new chat.", "State the goal, budget, and constraints.", "Review results and verify retailer details.", "Use Mandates and the Gateway demo to explore spending controls."]} note="Tool connections are limited in this prototype. Price monitoring, external account access, checkout, and payments are not active." links={[{ label: "Set spending rules", href: "/mandates" }, { label: "Test authorization", href: "/demo" }, { label: "Search products", href: "/shop" }]} />
 
           {activeView === "tools" ? <section className="mx-auto w-full max-w-4xl flex-1 overflow-y-auto px-7 py-9 max-sm:px-4">
             <div className="mb-7"><div className="mb-2 inline-flex items-center gap-2 rounded-full bg-[#eef2ff] px-3 py-1.5 text-xs font-medium text-[#315bff]"><Wrench size={13}/> Agent capabilities</div><h2 className="text-2xl font-semibold tracking-tight">Tools & integrations</h2><p className="mt-2 max-w-xl text-sm leading-6 text-[#667085]">Choose what this agent is allowed to use. A tool is only usable when its integration is connected and configured.</p></div>
