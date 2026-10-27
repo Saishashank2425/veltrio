@@ -134,7 +134,7 @@ export default function AgentHub() {
       const budget = budgetMatch ? Number(budgetMatch[1].replace(/,/g, "")) * (/^(k|thousand)$/i.test(budgetMatch[2] || "") ? 1000 : 1) : undefined;
       const shoppingIntent = /\b(find|search|show|recommend|suggest|buy|shop|looking for|best|compare|under ₹|under rs|smartwatch|watch|phone|laptop|headphone|earphone|earbud|shoes|shoe|tablet|monitor|camera|keyboard|mouse|product|price of)\b/.test(low);
       const trackingIntent = /\b(track|price alert|price drop|notify me|target price|price tracking|alert me)\b/.test(low);
-      const mandateIntent = /\b(mandate|spending rules|purchase rules|spending limit|purchase limit|allow my agent|only allow|ask me before|require approval|approval threshold)\b/.test(low);
+      const mandateIntent = /\b(mandate|spending rules|purchase rules|spending limit|purchase limit|allow my .*agent|spend up to|per purchase|monthly budget|ask me to approve|only allow|ask me before|require approval|approval threshold)\b/.test(low);
       const approvalIntent = /\b(buy it|purchase it|place order|checkout|pay for|order it|buy the|purchase the)\b/.test(low);
       const financeIntent = /\b(subscription|emi|bill|spending|finance|expense|budget summary)\b/.test(low);
       const foodIntent = /\b(pizza|food delivery|restaurant|order food|domino|burger)\b/.test(low);
