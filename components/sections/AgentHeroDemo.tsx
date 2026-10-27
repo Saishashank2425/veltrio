@@ -15,6 +15,12 @@ const tourScenes = [
   { title: "3. Keep control", body: "A purchase proposal must pass explicit rules. This demo does not connect checkout or move money.", state: "Approval remains with you" },
 ];
 
+const tourScenes = [
+  { title: "1. Describe the task", body: "Tell the agent what you need, your budget, and the constraints it must respect.", state: "Request received" },
+  { title: "2. Review the options", body: "The workspace organises the next step and shows which sources or tools are actually available.", state: "Research and compare" },
+  { title: "3. Keep control", body: "A purchase proposal must pass explicit rules. This demo does not connect checkout or move money.", state: "Approval remains with you" },
+];
+
 export function AgentHeroDemo() {
   const [prompt, setPrompt] = useState("");
   const [sent, setSent] = useState("");
