@@ -26,6 +26,7 @@ export default function MandatesClient() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [parserMode, setParserMode] = useState("deterministic-v1");
   useEffect(() => { try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) setMandates(JSON.parse(raw)); } catch { /* keep empty state */ } }, []);
   function persist(next: Mandate[]) { setMandates(next); try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { setError("Browser storage is unavailable; this mandate may not persist after reload."); } }
   async function parse(e: FormEvent) {
@@ -37,6 +38,8 @@ export default function MandatesClient() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Couldn't parse this mandate.");
       setDraft(data.mandate);
+      setParserMode(typeof data.parser === "string" ? data.parser : "deterministic-v1");
+      setNotice(data.aiAssisted ? "Gemini-assisted extraction completed. Review every field before saving." : "Deterministic fallback used. Configure GEMINI_API_KEY for AI-assisted extraction.");
     } catch (err) { setError(err instanceof Error ? err.message : "Couldn't parse this mandate."); }
     finally { setLoading(false); }
   }
@@ -70,7 +73,7 @@ export default function MandatesClient() {
           </form>
         </section>
         <section className="rounded-3xl border border-[#e4e7ec] bg-white p-5 shadow-[0_10px_35px_rgba(16,24,40,.04)] sm:p-7">
-          <div className="mb-5 flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-emerald-50 text-emerald-700"><Check size={20}/></span><div><h2 className="text-lg font-semibold">Review before saving</h2><p className="text-xs text-[#667085]">Nothing is active until you confirm the draft.</p></div></div>
+          <div className="mb-5 flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-emerald-50 text-emerald-700"><Check size={20}/></span><div><h2 className="text-lg font-semibold">Review before saving</h2><p className="text-xs text-[#667085]">Nothing is active until you confirm the draft.</p><p className="mt-1 text-[10px] font-medium text-[#315bff]">Parser: {parserMode === "gemini-2.5-flash" ? "Gemini AI-assisted" : "Deterministic fallback"}</p></div></div>
           {!draft ? <div className="grid min-h-64 place-items-center rounded-2xl border border-dashed border-[#d0d5dd] bg-[#fafbfc] p-6 text-center"><div><ShieldCheck size={30} className="mx-auto text-[#98a2b3]"/><p className="mt-3 text-sm font-medium text-[#475467]">Your structured rules will appear here</p><p className="mt-1 max-w-xs text-xs leading-5 text-[#98a2b3]">Create a draft to inspect the budget, merchant restrictions, approval threshold, and expiry.</p></div></div> :
           <div><div className="flex items-start justify-between gap-3"><div><h3 className="text-base font-semibold">{draft.name}</h3><p className="mt-1 text-xs leading-5 text-[#667085]">{draft.purpose}</p></div><span className={"shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase "+(draft.confidence==="high"?"bg-emerald-50 text-emerald-700":draft.confidence==="medium"?"bg-amber-50 text-amber-700":"bg-rose-50 text-rose-700")}>{draft.confidence} confidence</span></div>
             <dl className="mt-5 grid grid-cols-2 gap-3">{[
