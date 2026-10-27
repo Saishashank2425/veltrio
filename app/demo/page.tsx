@@ -18,7 +18,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import type { AuthorizationResult, Decision } from "@/lib/gateway";\nimport { PageGuide } from "@/components/ui/PageGuide";
+import type { AuthorizationResult, Decision } from "@/lib/gateway";
+import { PageGuide } from "@/components/ui/PageGuide";
 
 /* ============================================================
    Preset Scenarios (P2 — including adversarial)
@@ -672,7 +673,9 @@ export default function DemoPage() {
           </p>
         </div>
 
-        <PageGuide eyebrow="Authorization sandbox" title="Why this demo exists" purpose="Submit a sample purchase proposal and inspect the deterministic gateway decision. Use it to understand how a rule can allow, block, or escalate a request before real execution." steps={["Choose a preset or enter a proposal.","Submit it to the rule engine.","Read the decision and reason codes.","Inspect the audit log and policy rules."]} note="This sandbox evaluates demo policy data. It does not charge a card, contact a merchant, or execute a purchase." compact links={[{label:"Create a mandate draft",href:"/mandates"},{label:"Explore Agent Hub",href:"/agents"}]} />\n\n        {/* Tabs */}
+        <PageGuide eyebrow="Authorization sandbox" title="Why this demo exists" purpose="Submit a sample purchase proposal and inspect the deterministic gateway decision. Use it to understand how a rule can allow, block, or escalate a request before real execution." steps={["Choose a preset or enter a proposal.","Submit it to the rule engine.","Read the decision and reason codes.","Inspect the audit log and policy rules."]} note="This sandbox evaluates demo policy data. It does not charge a card, contact a merchant, or execute a purchase." compact links={[{label:"Create a mandate draft",href:"/mandates"},{label:"Explore Agent Hub",href:"/agents"}]} />
+
+        {/* Tabs */}
         <div role="tablist" aria-label="Gateway demo views" className="flex border-b border-ivory/10 mb-8 gap-1 overflow-x-auto">
           {TABS.map((tab) => (
             <button
