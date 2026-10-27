@@ -102,33 +102,92 @@ export default function AgentHub() {
     setActiveView("chat");
   }
   function sendMessage(text = input) {
-    const clean = text.trim(); if (!clean || !active) return;
+    const clean = text.trim();
+    if (!clean || !active) return;
+
     const userMessage: Message = { id: id(), role: "user", text: clean, time: now() };
-    const nextMessages = [...active.messages, userMessage];
-    patchConversation(active.id, (c) => ({ ...c, title: c.messages.length === 0 ? clean.slice(0, 38) : c.title === "New conversation" ? clean.slice(0, 38) : c.title, messages: nextMessages, updated: Date.now() }));
-    setInput(""); setStatus("Researching");
-    window.setTimeout(() => {
+    const priorMessages = active.messages;
+    const nextMessages = [...priorMessages, userMessage];
+    const title = active.messages.length === 0
+      ? clean.slice(0, 38)
+      : active.title === "New conversation" ? clean.slice(0, 38) : active.title;
+
+    patchConversation(active.id, (c) => ({
+      ...c,
+      title,
+      messages: nextMessages,
+      updated: Date.now(),
+    }));
+    setInput("");
+    setStatus("Thinking");
+
+    // Commerce intent is inferred from the question, then the response adapts to that intent.
+    // Live product facts are only shown when the configured product-search API returns them.
+    window.setTimeout(async () => {
       const low = clean.toLowerCase();
-      let reply = "I’ve captured your request. To give you verified options, I need the relevant service integration connected. You can open Tools & integrations to review available tools. I won’t invent live prices, availability, or completion status.";
+      const historyText = priorMessages.map((m) => m.text).join(" ").toLowerCase();
+      const isFollowUp = /\b(it|that|those|them|which one|the first|the second|compare|best one|more details)\b/.test(low);
+      let reply = "";
       let cards = false;
-      if (/pizza|domino|food|restaurant|margarita/.test(low)) {
-        reply = "I can help prepare that order. First, I’d need a connected menu/ordering tool to verify item availability and the actual price. Which delivery address should I use? Choose a saved address if available, enter one manually, or grant location permission. No order has been placed, and payment is not connected.";
-      } else if (/headphone|headset|earbud|earphone/.test(low)) {
-        reply = "I can compare comfort, sound, battery life, ANC, and warranty. Open Product search in the header to search Google Shopping, Amazon India, Flipkart, Croma, Reliance Digital, and Myntra. Veltrio opens retailer results in a new tab; it does not import or verify live prices and stock inside this app.";
-        cards = false;
-      } else if (/price|track|alert|cheaper|deal/.test(low)) {
-        reply = "I can help define a target price and tracking criteria. Price alerts need a connected product source and notification channel; neither will be represented as active until connected. What product and target price should I prepare?";
-      } else if (/subscription|emi|bill|spending|finance/.test(low)) {
-        reply = "The Finance Agent can work with records you have saved in Veltrio Finance on this browser. Those records are currently stored locally, and this chat does not have bank access or payment permissions. Open Finance to review or add your records.";
-      } else if (/stock|share|buy/.test(low)) {
-        reply = "I can help research a stock and define a watchlist or simulated conditional order. Live brokerage execution is not connected. I won’t submit a trade or imply that a purchase has been made.";
-      } else if (/hello|hi\b|hey/.test(low)) {
-        reply = "Hey! What would you like to get done? I can help plan a purchase, compare products, organise subscriptions, or review finance records. Connected tools are shown in the right panel.";
+
+      const budgetMatch = clean.match(/(?:under|below|less than|within|budget(?: of)?|₹|rs\.?\s*)(?:₹|rs\.?\s*)?([\d,]+)/i);
+      const budget = budgetMatch ? Number(budgetMatch[1].replace(/,/g, "")) : undefined;
+      const shoppingIntent = /\b(find|search|show|recommend|suggest|buy|shop|looking for|best|compare|under ₹|under rs|smartwatch|watch|phone|laptop|headphone|earphone|earbud|shoes|shoe|tablet|monitor|camera|keyboard|mouse|product|price of)\b/.test(low);
+      const trackingIntent = /\b(track|price alert|price drop|notify me|target price|price tracking|alert me)\b/.test(low);
+      const approvalIntent = /\b(buy it|purchase it|place order|checkout|pay for|order it|buy the|purchase the)\b/.test(low);
+      const financeIntent = /\b(subscription|emi|bill|spending|finance|expense|budget summary)\b/.test(low);
+      const foodIntent = /\b(pizza|food delivery|restaurant|order food|domino|burger)\b/.test(low);
+      const productSearchTerm = clean
+        .replace(/\b(find|search for|show me|recommend|suggest|please|can you|could you|help me find|best)\b/gi, " ")
+        .replace(/\b(under|below|less than|within my budget|with good|with|and|please)\b/gi, " ")
+        .replace(/₹\s*[\d,]+|rs\.?\s*[\d,]+|\b[\d,]+\s*(?:rupees|rs)\b/gi, " ")
+        .replace(/\s+/g, " ").trim();
+
+      try {
+        if (approvalIntent) {
+          reply = "I can prepare the purchase for authorization, but I haven't placed an order. Select the exact product and retailer first. Veltrio's deterministic gateway must then check the transaction against your mandate; if approval is required, you'll need to approve it explicitly. Real payment execution is not connected in this demo.";
+        } else if (trackingIntent) {
+          const hasTarget = /₹\s*[\d,]+|\b[\d,]+\s*(?:rupees|rs)\b/i.test(clean);
+          reply = hasTarget
+            ? "I've captured the product and target-price criteria from your message. This is a tracking plan only: automated price checks and notifications are not active until a monitoring source and notification channel are configured. You can use Product search to check current listings, then revisit the target price."
+            : "I can help define a target price and tracking criteria. What product should I watch, and what price would make it worth buying? Price monitoring and notifications are not active until a product source and notification channel are connected.";
+        } else if (foodIntent) {
+          reply = "I can help compare menu options and prepare an order. A live menu and ordering integration isn't connected, so I can't verify availability or place the order. Tell me the dish, serving size, budget, and preferred restaurant, and I'll help narrow down the choices.";
+        } else if (financeIntent) {
+          reply = "I can help organise your spending, bills, EMIs, and subscriptions using records saved in Veltrio Finance on this browser. Those records are local to this browser; bank access, account syncing, and payment execution aren't connected. What would you like to review first?";
+        } else if (shoppingIntent || (isFollowUp && /shopping|product|watch|headphone|laptop|phone/.test(historyText))) {
+          const query = productSearchTerm || clean;
+          setStatus("Searching products");
+          const params = new URLSearchParams({ q: query });
+          if (budget && Number.isFinite(budget)) params.set("budget", String(budget));
+          const response = await fetch("/api/products?" + params.toString(), { cache: "no-store" });
+          const data = await response.json();
+          const results = Array.isArray(data.results) ? data.results : [];
+          if (response.ok && data.configured && results.length) {
+            const intro = budget
+              ? `I found ${results.length} product listing(s) that match your search and budget of ₹${budget.toLocaleString("en-IN")}. Here's a quick shortlist:`
+              : `I found ${results.length} product listing(s) for your search. Here's a quick shortlist:`;
+            const list = results.slice(0, 5).map((p: { title?: string; price?: string | null; retailer?: string | null; rating?: number | null; url?: string }) =>
+              `• ${p.title || "Product"} — ${p.price || "price not listed"}${p.retailer ? ` at ${p.retailer}` : ""}${p.rating ? ` · rating ${p.rating}` : ""}${p.url ? `\n  ${p.url}` : ""}`
+            ).join("\n");
+            reply = `${intro}\n\n${list}\n\nPrices and availability can change; confirm the final details with the retailer. Tell me what matters most—design, fitness features, battery, durability, or value—and I'll compare the shortlist around that.`;
+            cards = true;
+          } else {
+            reply = `I understand you're looking for ${query || "a product"}${budget ? ` under ₹${budget.toLocaleString("en-IN")}` : ""}. ${typeof data.message === "string" ? data.message : "Live product results aren't available from the connected source right now."} You can still open Product search to search retailer listings. If you share your top priorities, I'll help you compare the specifications and trade-offs without inventing prices or ratings.`;
+          }
+        } else if (/\b(hello|hi\b|hey|good morning|good evening)\b/.test(low)) {
+          reply = "Hey! What are you trying to get done? I can help you discover and compare products, think through a purchase, define price targets, or review spending. Ask naturally—I'll adapt the answer to your request. I'll also be clear about which tools are actually connected.";
+        } else {
+          reply = "I can help with product discovery, comparisons, purchase planning, price-target planning, and finance organisation. Tell me what you're trying to achieve and any constraints—such as budget, preferred brands, must-have features, or deadline. I'll choose a useful format for the question rather than forcing every answer into the same template. If live data or an integration is needed, I'll say so clearly.";
+        }
+      } catch {
+        reply = "I understood your request, but the connected product search couldn't be reached just now. You can retry from Product search. I won't make up live prices, ratings, availability, or claim that an action was completed.";
       }
+
       const assistantMessage: Message = { id: id(), role: "assistant", text: reply, time: now(), cards };
       patchConversation(active.id, (c) => ({ ...c, messages: [...c.messages, assistantMessage], updated: Date.now() }));
       setStatus("Waiting for you");
-    }, 500);
+    }, 250);
   }
   function createAgent() {
     if (!agentName.trim()) return;
