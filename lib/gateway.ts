@@ -322,15 +322,21 @@ export function validateProposal(
     }
   }
 
+  // Narrow the validated unknown values before constructing the typed proposal.
+  const agent = b.agent as string;
+  const vendor = b.vendor as string;
+  const category = b.category as string;
+  const description = b.description as string;
+
   return {
     ok: true,
     proposal: {
-      agent: b.agent.slice(0, 100),
-      vendor: b.vendor.slice(0, 100),
-      category: b.category.slice(0, 100),
+      agent: agent.slice(0, 100),
+      vendor: vendor.slice(0, 100),
+      category: category.slice(0, 100),
       amount: b.amount,
       currency: "USD",
-      description: b.description.slice(0, 500),
+      description: description.slice(0, 500),
       isSubscription: b.isSubscription === true,
       isNewVendor: b.isNewVendor === true,
     },
