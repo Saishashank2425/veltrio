@@ -103,10 +103,7 @@ export function Hero() {
               transition={{ delay: 0.24, duration: 0.6, ease: EASE }}
               className="text-lg text-ivory/60 leading-relaxed max-w-md mb-10"
             >
-              AI agents can now purchase on your behalf. Veltrio sits between
-              the agent and the transaction — checking every proposed spend
-              against the rules you set, deterministically, before a single
-              dollar moves.
+              AI agents can research and propose purchases. Veltrio is designed to put a clear policy check between that proposal and payment — so limits, merchant rules, and approval thresholds stay visible before money moves.
             </motion.p>
 
             {/* CTAs */}
@@ -128,6 +125,8 @@ export function Hero() {
                 </Button>
               </a>
             </motion.div>
+
+            <p className="mt-5 max-w-md text-xs leading-5 text-ivory/35">Prototype status: the gateway evaluates demo proposals. Merchant checkout and real payment execution are not connected.</p>
 
             {/* Trust signal */}
             <motion.div
