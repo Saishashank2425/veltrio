@@ -31,6 +31,7 @@ export default function ShopPage() {
   const [searchError, setSearchError] = useState("");
   const [providerMessage, setProviderMessage] = useState("");
   const [providerConfigured, setProviderConfigured] = useState(false);
+  const [providerName, setProviderName] = useState("");
 
   const activeQuery = useMemo(() => {
     const parts = [query.trim(), budget.trim() ? `under ₹${budget.trim()}` : ""].filter(Boolean);
@@ -60,6 +61,7 @@ export default function ShopPage() {
       if (!response.ok) throw new Error(typeof data.error === "string" ? data.error : "Product search failed.");
       setProducts(Array.isArray(data.results) ? data.results : []);
       setProviderConfigured(data.configured === true);
+      setProviderName(typeof data.provider === "string" ? data.provider : "");
       setProviderMessage(typeof data.message === "string" ? data.message : typeof data.note === "string" ? data.note : "");
     } catch (error) {
       setSearchError(error instanceof Error ? error.message : "Product search failed. Please try again.");
@@ -103,7 +105,7 @@ export default function ShopPage() {
         {searched && <section className="mt-10">
           <div className="mb-5 rounded-2xl border border-[#e5e9f0] bg-white p-5">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div><p className="text-xs font-semibold uppercase tracking-[.14em] text-[#315bff]">Live product results</p><h2 className="mt-1 text-xl font-semibold">Results for “{activeQuery}”</h2><p className="mt-1 text-xs text-[#667085]">{providerConfigured ? `${products.length} listing(s) returned by Google Shopping` : "Live listings appear here when the product data provider is configured."}</p></div>
+              <div><p className="text-xs font-semibold uppercase tracking-[.14em] text-[#315bff]">Live product results</p><h2 className="mt-1 text-xl font-semibold">Results for “{activeQuery}”</h2><p className="mt-1 text-xs text-[#667085]">{providerConfigured ? `${products.length} listing(s) returned by ${providerName || "the configured product provider"}` : "Live listings appear here when Channel3 or the optional SerpApi provider is configured."}</p></div>
               {loading && <span role="status" className="inline-flex items-center gap-2 text-sm text-[#667085]"><span className="h-4 w-4 animate-spin rounded-full border-2 border-[#dbe4ff] border-t-[#315bff]"/>Searching products…</span>}
             </div>
             {searchError && <p role="alert" className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">{searchError}</p>}
