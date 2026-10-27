@@ -42,7 +42,7 @@ function GatewayDiagram() {
         {/* Approved node */}
         <rect x="340" y="44" width="120" height="52" rx="8" fill="#FFFFFF" stroke="#16794B" strokeWidth="1" strokeOpacity="0.7" />
         <text x="400" y="67" textAnchor="middle" fill="#16794B" fontSize="10" fontWeight="600">✓ Approved</text>
-        <text x="400" y="82" textAnchor="middle" fill="#111827" fontSize="9" opacity="0.5">purchase executes</text>
+        <text x="400" y="82" textAnchor="middle" fill="#111827" fontSize="9" opacity="0.5">proposal is evaluated</text>
         <text x="400" y="92" textAnchor="middle" fill="#111827" fontSize="9" opacity="0.5">+ audit log</text>
 
         {/* Blocked node */}
@@ -79,7 +79,7 @@ export function Hero() {
               className="inline-flex items-center gap-2 text-xs font-semibold tracking-[0.2em] uppercase text-gold mb-8"
             >
               <ShieldCheck className="w-3.5 h-3.5" />
-              Authorization Gateway
+              AI commerce authorization
             </motion.span>
 
             {/* Headline */}
@@ -91,7 +91,7 @@ export function Hero() {
             >
               Commerce moves.
               <br />
-              <span className="text-gold">You stay</span>
+              <span className="text-[#8FA4FF]">You stay</span>
               <br />
               in control.
             </motion.h1>
@@ -129,7 +129,7 @@ export function Hero() {
               </Link>
             </motion.div>
 
-            <p className="mt-5 max-w-md text-xs leading-5 text-ivory/35">Prototype status: the gateway evaluates demo proposals. Merchant checkout and real payment execution are not connected.</p>
+            <p className="mt-5 max-w-md text-xs leading-5 text-ivory/35">Prototype: the gateway evaluates sample proposals. Merchant checkout and real payment execution are not connected.</p>
 
             {/* Trust signal */}
             <motion.div
@@ -138,9 +138,9 @@ export function Hero() {
               transition={{ delay: 0.48, duration: 0.6, ease: EASE }}
               className="flex items-center gap-3 mt-10 flex-wrap"
             >
-              <Badge variant="approved" label="Rules enforced" />
-              <Badge variant="blocked" label="Violations blocked" />
-              <Badge variant="pending" label="Escalations queued" />
+              <Badge variant="approved" label="Deterministic demo rules" />
+              <Badge variant="blocked" label="Explicit block outcomes" />
+              <Badge variant="pending" label="Reviewable decisions" />
             </motion.div>
           </div>
 
