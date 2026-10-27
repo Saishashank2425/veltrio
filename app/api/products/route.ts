@@ -95,8 +95,11 @@ export async function GET(request: NextRequest) {
         const image = typeof imageValue === "string" && /^https:\/\//i.test(imageValue) ? imageValue : null;
         const website = offer.website && typeof offer.website === "object" ? offer.website as Record<string, unknown> : {};
         const retailer = typeof offer.merchant === "string" ? offer.merchant : typeof website.name === "string" ? website.name : typeof item.brand === "string" ? item.brand : null;
-        const currency = typeof rawPriceObject.currency === "string" ? rawPriceObject.currency.toUpperCase() : parsed.currency;
-        const price = parsed.label;
+        const rawCurrency = typeof rawPriceObject.currency === "string" ? rawPriceObject.currency.toUpperCase() : parsed.currency;
+        const currency = rawCurrency && /^[A-Z]{3}$/.test(rawCurrency) ? rawCurrency : parsed.currency;
+        const price = parsed.amount !== null && currency && /^[A-Z]{3}$/.test(currency)
+          ? new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: 2 }).format(parsed.amount)
+          : parsed.label;
         const ratingRaw = Number(item.rating);
         const reviewsRaw = Number(item.reviews);
         return [{
