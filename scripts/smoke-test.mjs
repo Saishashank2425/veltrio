@@ -56,6 +56,20 @@ try {
   if (mandateBody.mandate?.approvalAbove !== 3000) throw new Error("Mandate parser should extract ₹3,000 approval threshold.");
   if (mandateBody.mandate?.expiresInDays !== 30) throw new Error("Mandate parser should extract 30-day expiry.");
 
+  const merchantMandateResponse = await fetch(`${base}/api/mandates/parse`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ text: "Only allow groceries from BigBasket and Amazon Fresh, max ₹2,000 per order, block subscriptions, and ask for approval above ₹1,000." }),
+  });
+  await assertStatus(merchantMandateResponse, 200, "Merchant-restricted mandate");
+  const merchantMandate = (await merchantMandateResponse.json()).mandate;
+  if (merchantMandate?.maxPerTransaction !== 2000) throw new Error("Mandate parser should extract ₹2,000 purchase cap.");
+  if (merchantMandate?.approvalAbove !== 1000) throw new Error("Mandate parser should extract ₹1,000 approval threshold.");
+  if (!merchantMandate?.allowedMerchants?.includes("BigBasket") || !merchantMandate?.allowedMerchants?.includes("Amazon Fresh")) {
+    throw new Error("Mandate parser should extract allowed merchants.");
+  }
+  if (!merchantMandate?.blockedCategories?.includes("subscriptions")) throw new Error("Mandate parser should extract blocked categories.");
+
   const invalidMandateResponse = await fetch(`${base}/api/mandates/parse`, {
     method: "POST",
     headers: { "content-type": "application/json" },
