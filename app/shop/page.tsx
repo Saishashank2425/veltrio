@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState, type FormEvent } from "react";
-import { ArrowLeft, ArrowUpRight, ExternalLink, Search, ShieldCheck, ShoppingBag, SlidersHorizontal, Sparkles } from "lucide-react";\nimport { PageGuide } from "@/components/ui/PageGuide";
+import { ArrowLeft, ArrowUpRight, ExternalLink, Search, ShieldCheck, ShoppingBag, SlidersHorizontal, Sparkles } from "lucide-react";
+import { PageGuide } from "@/components/ui/PageGuide";
 
 const retailers = [
   { id: "google", name: "Google Shopping", detail: "Compare listings across stores", url: (q: string) => `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(q)}`, badge: "Broad comparison" },
@@ -81,7 +82,8 @@ export default function ShopPage() {
         </div>
       </header>
 
-      <PageGuide eyebrow="Product discovery" title="Why this page exists" purpose="Use one search to start comparing product listings, then open the retailer to verify the final price, seller, stock, delivery, and return policy before deciding." steps={["Enter a product and key requirements.","Add a budget if you have one.","Review available listings and retailer links.","Confirm current details on the retailer site."]} note="Live in-page product cards require the configured search provider. Retailer links remain available, but searching here never places an order or authorizes a payment." compact links={[{label:"Open Agent Hub",href:"/agents"},{label:"Create spending rules",href:"/mandates"}]} />\n      <div className="mx-auto max-w-6xl px-5 py-10 sm:py-14">
+      <PageGuide eyebrow="Product discovery" title="Why this page exists" purpose="Use one search to start comparing product listings, then open the retailer to verify the final price, seller, stock, delivery, and return policy before deciding." steps={["Enter a product and key requirements.","Add a budget if you have one.","Review available listings and retailer links.","Confirm current details on the retailer site."]} note="Live in-page product cards require the configured search provider. Retailer links remain available, but searching here never places an order or authorizes a payment." compact links={[{label:"Open Agent Hub",href:"/agents"},{label:"Create spending rules",href:"/mandates"}]} />
+      <div className="mx-auto max-w-6xl px-5 py-10 sm:py-14">
         <div className="mx-auto max-w-3xl text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-[#dbe4ff] bg-[#eef2ff] px-3 py-1.5 text-xs font-medium text-[#315bff]"><Sparkles size={13}/> Shopping assistant</span>
           <h1 className="mt-5 text-4xl font-semibold tracking-tight sm:text-5xl">Find it. Compare it. <span className="text-[#315bff]">Stay in control.</span></h1>
