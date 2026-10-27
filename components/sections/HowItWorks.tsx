@@ -25,7 +25,7 @@ const steps = [
     icon: FileText,
     title: "Approved or blocked — with a full audit trail",
     description:
-      "If all rules pass, the purchase executes. If any rule fails, it's blocked immediately. Either way, every decision is logged with the rule that triggered it and a machine-readable reason.",
+      "The gateway returns ALLOW, BLOCK, or ESCALATE and records the decision with a reason. This prototype demonstrates authorization logic; it does not execute a merchant checkout or move money.",
   },
 ];
 
@@ -40,8 +40,7 @@ export function HowItWorks() {
             Three steps. Zero ambiguity.
           </h2>
           <p className="mt-4 text-ivory/50 max-w-lg mx-auto text-base">
-            Every purchase goes through the same deterministic process — no
-            special cases, no overrides, no back doors.
+            Every submitted demo proposal follows the same rule-evaluation path. The current proof focuses on the decision and audit trail, not real payment execution.
           </p>
         </div>
 
