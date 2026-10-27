@@ -12,9 +12,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Veltrio — Commerce moves. You stay in control.",
+  title: "Veltrio — AI commerce, with explicit policy checks.",
   description:
-    "Veltrio is a deterministic AI authorization gateway that checks every agent purchase against your approved spending rules before it executes.",
+    "Veltrio is a prototype for AI commerce authorization. Explore product research, spending mandate drafts, and a deterministic gateway demo with explicit decision outcomes.",
   openGraph: {
     title: "Veltrio",
     description: "Commerce moves. You stay in control.",
