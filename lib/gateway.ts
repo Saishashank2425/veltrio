@@ -244,7 +244,7 @@ const RULES: RuleEvaluator[] = [
 /* ============================================================
    Core authorization function (exported for testing)
    ============================================================ */
-export function authorize(proposal: PurchaseProposal): AuthorizationResult {
+export function authorize(proposal: PurchaseProposal, options: { recordSpend?: boolean } = {}): AuthorizationResult {
   const start = Date.now();
   const rulesEvaluated: RuleResult[] = [];
   let triggeringRule: RuleResult | null = null;
@@ -268,7 +268,7 @@ export function authorize(proposal: PurchaseProposal): AuthorizationResult {
   }
 
   // Record spend only when approved
-  if (finalDecision === "ALLOW") {
+  if (finalDecision === "ALLOW" && options.recordSpend !== false) {
     recordSpend(proposal.category, proposal.amount);
   }
 
