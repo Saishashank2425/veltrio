@@ -14,11 +14,17 @@ const retailers = [
 
 const suggestions = ["wireless headphones", "laptop under ₹60,000", "running shoes", "office chair", "smartwatch"];
 
+type ProductResult = {
+  id: string; title: string; price: string | null; amount: number | null;
+  currency: string | null; image: string | null; url: string; retailer: string | null;
+  rating: number | null; reviews: number | null; delivery: string | null;
+};
+
 export default function ShopPage() {
   const [query, setQuery] = useState("");
   const [budget, setBudget] = useState("");
   const [category, setCategory] = useState("All");
-  const [searched, setSearched] = useState(false);
+  const [searched, setSearched] = useState(false);\n  const [products, setProducts] = useState<ProductResult[]>([]);\n  const [loading, setLoading] = useState(false);\n  const [searchError, setSearchError] = useState("");\n  const [providerMessage, setProviderMessage] = useState("");\n  const [providerConfigured, setProviderConfigured] = useState(false);
 
   const activeQuery = useMemo(() => {
     const parts = [query.trim(), budget.trim() ? `under ₹${budget.trim()}` : ""].filter(Boolean);
@@ -32,10 +38,33 @@ export default function ShopPage() {
     return ["google", "amazon", "flipkart"].includes(retailer.id);
   });
 
+  async function runSearch(searchTerm = query) {
+    if (!searchTerm.trim()) return;
+    setQuery(searchTerm);
+    setSearched(true);
+    setLoading(true);
+    setSearchError("");
+    setProviderMessage("");
+    setProducts([]);
+    try {
+      const params = new URLSearchParams({ q: searchTerm.trim() });
+      if (budget.trim()) params.set("budget", budget.trim());
+      const response = await fetch(`/api/products?${params.toString()}`, { cache: "no-store" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(typeof data.error === "string" ? data.error : "Product search failed.");
+      setProducts(Array.isArray(data.results) ? data.results : []);
+      setProviderConfigured(data.configured === true);
+      setProviderMessage(typeof data.message === "string" ? data.message : typeof data.note === "string" ? data.note : "");
+    } catch (error) {
+      setSearchError(error instanceof Error ? error.message : "Product search failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!query.trim()) return;
-    setSearched(true);
+    void runSearch();
   }
 
   return (
@@ -62,14 +91,23 @@ export default function ShopPage() {
           </div>
         </form>
 
-        {!searched && <div className="mx-auto mt-4 flex max-w-3xl flex-wrap items-center justify-center gap-2"><span className="mr-1 text-xs text-[#98a2b3]">Try:</span>{suggestions.map((suggestion)=><button key={suggestion} onClick={()=>{setQuery(suggestion);setSearched(true);}} className="rounded-full border border-[#e4e7ec] bg-white px-3 py-1.5 text-xs text-[#667085] transition hover:border-[#c6d2ff] hover:text-[#315bff]">{suggestion}</button>)}</div>}
+        {!searched && <div className="mx-auto mt-4 flex max-w-3xl flex-wrap items-center justify-center gap-2"><span className="mr-1 text-xs text-[#98a2b3]">Try:</span>{suggestions.map((suggestion)=><button key={suggestion} onClick={()=>{void runSearch(suggestion);}} className="rounded-full border border-[#e4e7ec] bg-white px-3 py-1.5 text-xs text-[#667085] transition hover:border-[#c6d2ff] hover:text-[#315bff]">{suggestion}</button>)}</div>}
 
         {searched && <section className="mt-10">
+          <div className="mb-5 rounded-2xl border border-[#e5e9f0] bg-white p-5">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div><p className="text-xs font-semibold uppercase tracking-[.14em] text-[#315bff]">Live product results</p><h2 className="mt-1 text-xl font-semibold">Results for “{activeQuery}”</h2><p className="mt-1 text-xs text-[#667085]">{providerConfigured ? `${products.length} listing(s) returned by Google Shopping` : "Live listings appear here when the product data provider is configured."}</p></div>
+              {loading && <span role="status" className="inline-flex items-center gap-2 text-sm text-[#667085]"><span className="h-4 w-4 animate-spin rounded-full border-2 border-[#dbe4ff] border-t-[#315bff]"/>Searching products…</span>}
+            </div>
+            {searchError && <p role="alert" className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">{searchError}</p>}
+            {!loading && providerMessage && <p className="mt-3 rounded-lg bg-[#eef2ff] p-3 text-sm text-[#344a82]">{providerMessage}</p>}
+            {!loading && products.length > 0 && <><div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{products.map((product)=><article key={product.id} className="overflow-hidden rounded-xl border border-[#e5e9f0] bg-white"><div className="flex h-44 items-center justify-center bg-[#f8fafc] p-3">{product.image ? <img src={product.image} alt="" loading="lazy" className="max-h-full max-w-full object-contain"/> : <ShoppingBag size={30} className="text-[#98a2b3]"/>}</div><div className="p-4"><p className="line-clamp-2 min-h-10 text-sm font-semibold">{product.title}</p><p className="mt-2 text-lg font-bold text-[#172033]">{product.price ?? "Price unavailable"}</p><p className="mt-1 text-xs text-[#667085]">{product.retailer ?? "Retailer"}{product.rating ? ` · ★ ${product.rating.toFixed(1)}` : ""}{product.reviews ? ` (${product.reviews.toLocaleString()} reviews)` : ""}</p>{product.delivery && <p className="mt-1 text-xs text-[#667085]">{product.delivery}</p>}<a href={product.url} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-[#315bff] px-3 text-xs font-semibold text-white hover:bg-[#2446d8]">View at retailer <ArrowUpRight size={14}/></a></div></article>)}</div><p className="mt-4 text-xs leading-5 text-[#667085]">Listings, prices, ratings, and stock can change. Confirm the final price, seller, and availability on the retailer’s page.</p></>}
+          </div>
           <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end"><div><p className="text-xs font-semibold uppercase tracking-[.14em] text-[#315bff]">Search destinations</p><h2 className="mt-1 text-xl font-semibold">Results for “{activeQuery}”</h2><p className="mt-1 text-sm text-[#667085]">Choose a store to open its search results.</p></div><div className="flex flex-wrap gap-2">{["All","Electronics","Fashion","Other"].map((item)=><button key={item} onClick={()=>setCategory(item)} className={"rounded-full px-3 py-1.5 text-xs font-medium "+(category===item?"bg-[#172033] text-white":"border border-[#e4e7ec] bg-white text-[#667085] hover:border-[#cbd5e1]")}>{item}</button>)}</div></div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{visibleRetailers.map((retailer)=><article key={retailer.id} className="flex min-h-44 flex-col rounded-2xl border border-[#e5e9f0] bg-white p-5 transition hover:-translate-y-0.5 hover:border-[#c6d2ff] hover:shadow-md"><div className="flex items-start justify-between"><span className="grid h-10 w-10 place-items-center rounded-xl bg-[#eef2ff] text-[#315bff]"><ShoppingBag size={18}/></span><span className="rounded-full bg-[#f2f4f7] px-2 py-1 text-[10px] font-medium text-[#667085]">{retailer.badge}</span></div><h3 className="mt-4 text-base font-semibold">{retailer.name}</h3><p className="mt-1 flex-1 text-xs leading-5 text-[#667085]">{retailer.detail}</p><a href={retailer.url(activeQuery)} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[#dfe4eb] px-3 text-xs font-semibold text-[#344054] transition hover:border-[#315bff] hover:text-[#315bff]">Search {retailer.name}<ArrowUpRight size={14}/></a></article>)}</div>
         </section>}
 
-        {!searched && <section className="mx-auto mt-12 max-w-4xl"><div className="mb-4 flex items-center gap-2"><ShoppingBag size={17} className="text-[#315bff]"/><h2 className="text-sm font-semibold">Popular places to search</h2></div><div className="grid gap-3 sm:grid-cols-3">{retailers.slice(0,3).map((retailer)=><article key={retailer.id} className="rounded-2xl border border-[#e5e9f0] bg-white p-4"><h3 className="text-sm font-semibold">{retailer.name}</h3><p className="mt-1 text-xs leading-5 text-[#667085]">{retailer.detail}</p><button onClick={()=>{setQuery("wireless headphones");setSearched(true);}} className="mt-3 text-xs font-semibold text-[#315bff]">Try a sample search <ArrowUpRight className="ml-1 inline" size={13}/></button></article>)}</div></section>}
+        {!searched && <section className="mx-auto mt-12 max-w-4xl"><div className="mb-4 flex items-center gap-2"><ShoppingBag size={17} className="text-[#315bff]"/><h2 className="text-sm font-semibold">Popular places to search</h2></div><div className="grid gap-3 sm:grid-cols-3">{retailers.slice(0,3).map((retailer)=><article key={retailer.id} className="rounded-2xl border border-[#e5e9f0] bg-white p-4"><h3 className="text-sm font-semibold">{retailer.name}</h3><p className="mt-1 text-xs leading-5 text-[#667085]">{retailer.detail}</p><button onClick={()=>{void runSearch("wireless headphones");}} className="mt-3 text-xs font-semibold text-[#315bff]">Try a sample search <ArrowUpRight className="ml-1 inline" size={13}/></button></article>)}</div></section>}
 
         <div className="mx-auto mt-10 flex max-w-3xl gap-3 rounded-2xl border border-[#dbe4ff] bg-[#eef2ff]/70 p-4"><ShieldCheck size={19} className="mt-0.5 shrink-0 text-[#315bff]"/><div><p className="text-xs font-semibold text-[#253f91]">Transparent search, safe decisions</p><p className="mt-1 text-xs leading-5 text-[#52617e]">Retailer searches open in a new tab. This version does not scrape or verify live inventory, final prices, discounts, or seller quality inside Veltrio. Confirm details on the retailer’s page. No order is placed and no payment is authorized by searching.</p></div></div>
         <footer className="mt-10 flex items-center justify-center gap-2 text-[11px] text-[#98a2b3]"><ExternalLink size={12}/> External retailer sites have their own terms, listings, and availability.</footer>
