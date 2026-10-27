@@ -297,29 +297,42 @@ export function validateProposal(
   }
 
   const b = body as Record<string, unknown>;
-  const required = ["agent", "vendor", "category", "amount", "description"] as const;
+  const requiredTextFields = ["agent", "vendor", "category", "description"] as const;
 
-  for (const field of required) {
+  for (const field of requiredTextFields) {
     if (b[field] === undefined || b[field] === null || b[field] === "") {
       return { ok: false, error: `Missing required field: ${field}` };
     }
+    if (typeof b[field] !== "string" || !b[field].trim()) {
+      return { ok: false, error: `${field} must be a non-empty string.` };
+    }
   }
 
-  if (typeof b.amount !== "number" || b.amount <= 0 || !isFinite(b.amount)) {
+  if (typeof b.amount !== "number" || b.amount <= 0 || !Number.isFinite(b.amount)) {
     return { ok: false, error: "amount must be a positive finite number (USD)." };
+  }
+
+  if (b.currency !== undefined && b.currency !== "USD") {
+    return { ok: false, error: "Only USD is supported by the current authorization policy." };
+  }
+
+  for (const field of ["isSubscription", "isNewVendor"] as const) {
+    if (b[field] !== undefined && typeof b[field] !== "boolean") {
+      return { ok: false, error: `${field} must be a boolean when provided.` };
+    }
   }
 
   return {
     ok: true,
     proposal: {
-      agent: String(b.agent).slice(0, 100),
-      vendor: String(b.vendor).slice(0, 100),
-      category: String(b.category).slice(0, 100),
+      agent: b.agent.slice(0, 100),
+      vendor: b.vendor.slice(0, 100),
+      category: b.category.slice(0, 100),
       amount: b.amount,
-      currency: b.currency ? String(b.currency).slice(0, 3) : "USD",
-      description: String(b.description).slice(0, 500),
-      isSubscription: Boolean(b.isSubscription),
-      isNewVendor: Boolean(b.isNewVendor),
+      currency: "USD",
+      description: b.description.slice(0, 500),
+      isSubscription: b.isSubscription === true,
+      isNewVendor: b.isNewVendor === true,
     },
   };
 }
