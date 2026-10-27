@@ -9,6 +9,7 @@ import { Menu, X } from "lucide-react";
 const navLinks = [
   { label: "How it works", href: "/#how-it-works" },
   { label: "Agent Hub", href: "/agents" },
+  { label: "Product search", href: "/shop" },
   { label: "Mandates", href: "/mandates" },
   { label: "Demo", href: "/demo" },
   { label: "Finance", href: "/finance" },
@@ -60,7 +61,7 @@ export function Navbar() {
               <rect x="15" y="15" width="11" height="11" rx="2" fill="#315BFF" opacity="0.15" />
             </svg>
           </div>
-          <span className="text-ivory font-semibold text-lg tracking-tight group-hover:text-gold transition-colors">
+          <span className="text-ivory font-semibold text-lg tracking-tight group-hover:text-[#8FA4FF] transition-colors">
             Veltrio
           </span>
         </Link>
