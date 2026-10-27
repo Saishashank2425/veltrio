@@ -470,9 +470,22 @@ function AuditLogTab() {
     try {
       const res = await fetch("/api/authorize");
       const data = await res.json();
+      if (!res.ok || !Array.isArray(data.entries)) throw new Error("Invalid audit response");
       setEntries(data.entries);
     } catch {
       setError("Failed to load audit log.");
+    } finally { setLoading(false); }
+  }
+
+  async function resetDemo() {
+    if (!window.confirm("Reset the demo spend counters and clear its audit log?")) return;
+    setLoading(true); setError(null);
+    try {
+      const res = await fetch("/api/reset", { method: "POST" });
+      if (!res.ok) throw new Error("Reset failed");
+      await load();
+    } catch {
+      setError("Could not reset the demo. Please try again.");
     } finally { setLoading(false); }
   }
 
@@ -485,10 +498,15 @@ function AuditLogTab() {
         <p className="text-sm text-ivory/50">
           Last {entries?.length ?? 0} authorization decisions this session.
         </p>
-        <Button variant="secondary" size="sm" onClick={load} disabled={loading}>
-          {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCcw className="w-3.5 h-3.5" />}
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" onClick={resetDemo} disabled={loading}>
+            Reset demo
+          </Button>
+          <Button variant="secondary" size="sm" onClick={() => void load()} disabled={loading}>
+            {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCcw className="w-3.5 h-3.5" />}
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {error && <p className="text-sm text-blocked">{error}</p>}

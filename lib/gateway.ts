@@ -54,6 +54,18 @@ export const monthlySpend: Record<string, number> = {
   "Software & SaaS": 0,
 };
 
+const INITIAL_MONTHLY_SPEND: Record<string, number> = {
+  Travel: 1340,
+  "Operating Expenses": 4780,
+  "Software & SaaS": 0,
+};
+
+export function resetDemoState(): void {
+  for (const key of Object.keys(monthlySpend)) delete monthlySpend[key];
+  Object.assign(monthlySpend, INITIAL_MONTHLY_SPEND);
+  auditLog.length = 0;
+}
+
 export function getCategorySpend(category: string): number {
   return monthlySpend[category] ?? 0;
 }
