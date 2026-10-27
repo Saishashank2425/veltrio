@@ -4,6 +4,17 @@
 
 > **Demo safety:** the app currently uses in-memory sample data. It does not execute real payments, connect to bank accounts, or persist audit logs. Provider integrations are not enabled unless explicitly configured and verified.
 
+## Live product search
+
+The Shop page can display product cards with images, prices, retailer names, ratings (when available), and retailer links using Google Shopping results from SerpApi.
+
+1. Create a SerpApi account and obtain an API key: https://serpapi.com/
+2. In Render, open the Veltrio web service and add the environment variable `SERPAPI_API_KEY` with your key. Keep it server-side; do not use a `NEXT_PUBLIC_` prefix and do not commit the real key.
+3. Redeploy the service. The Shop page calls `GET /api/products?q=...` on the server; the provider key is never sent to the browser.
+4. If no key is configured, the endpoint returns an explanatory setup message and the retailer search links remain available.
+
+The provider may return incomplete or changing prices, ratings, and availability. Veltrio does not guarantee listing accuracy and does not place orders or authorize payments through product search. The optional provider has its own pricing, quotas, and terms.
+
 ## Product surfaces
 
 - **Landing page:** product overview, policy flow and security principles.
