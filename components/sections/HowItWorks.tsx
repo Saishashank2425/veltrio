@@ -11,14 +11,14 @@ const steps = [
     icon: ShoppingCart,
     title: "Agent proposes a purchase",
     description:
-      "Your AI agent identifies a transaction it wants to execute — a supplier invoice, a SaaS subscription, a travel booking — and submits the details to the Veltrio gateway.",
+      "An agent or user submits a sample purchase proposal with its amount, merchant, and category to the Veltrio demo gateway.",
   },
   {
     step: 2,
     icon: Shield,
     title: "Gateway checks your rules",
     description:
-      "Veltrio evaluates the proposal against your exact spending rules: vendor allowlists, per-category budgets, approval thresholds, time windows. No inference. No guessing.",
+      "The deterministic demo evaluates the proposal against configured sample rules and returns a clear decision. The current prototype does not connect saved mandates to the gateway.",
   },
   {
     step: 3,
@@ -37,10 +37,10 @@ export function HowItWorks() {
         <div className="text-center mb-16">
           <SectionLabel light>How it works</SectionLabel>
           <h2 className="text-4xl sm:text-5xl font-bold text-ivory tracking-tight">
-            Three steps. Zero ambiguity.
+            A clear path from request to decision.
           </h2>
           <p className="mt-4 text-ivory/50 max-w-lg mx-auto text-base">
-            Every submitted demo proposal follows the same rule-evaluation path. The current proof focuses on the decision and audit trail, not real payment execution.
+            Explore a sample proposal, inspect its decision and reason, then review the in-memory audit trail. Checkout, payment execution, and durable audit storage are not connected.
           </p>
         </div>
 
