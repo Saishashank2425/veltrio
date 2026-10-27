@@ -13,7 +13,6 @@ const navLinks = [
   { label: "Mandates", href: "/mandates" },
   { label: "Demo", href: "/demo" },
   { label: "Finance", href: "/finance" },
-  { label: "Trust", href: "/#trust" },
 ];
 
 export function Navbar() {
