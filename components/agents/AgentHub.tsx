@@ -38,17 +38,7 @@ const starterAgents: Agent[] = [
 ];
 
 const starterConversations: Conversation[] = [
-  { id: "welcome", title: "Find something for me", agentId: "shopping", updated: Date.now(), messages: [
-    { id: "welcome-1", role: "assistant", time: "Now", text: "Hi! I’m your Veltrio agent workspace. Tell me what you want to find, compare, track, or plan. I’ll show useful options and ask before any consequential action." },
-  ] },
-  { id: "headphones-chat", title: "Best headphones under ₹5,000", agentId: "headphones", updated: Date.now() - 100000, messages: [
-    { id: "h1", role: "user", time: "Yesterday", text: "Help me find good headphones under ₹5,000." },
-    { id: "h2", role: "assistant", time: "Yesterday", text: "I can help compare sound, comfort, battery life, and noise cancellation. Product search is available from the Product search button. You can open retailer searches for live listings, then compare price and availability on the retailer site." },
-  ] },
-  { id: "subs-chat", title: "Review my subscriptions", agentId: "subscriptions", updated: Date.now() - 200000, messages: [
-    { id: "s1", role: "user", time: "Mon", text: "Help me review recurring subscriptions." },
-    { id: "s2", role: "assistant", time: "Mon", text: "The Subscription Agent can help review finance records saved in this browser. It cannot access provider accounts or cancel subscriptions unless a supported integration is connected." },
-  ] },
+  { id: "welcome", title: "Start a task", agentId: "shopping", updated: Date.now(), messages: [] },
 ];
 
 function id() { return Math.random().toString(36).slice(2, 10); }
