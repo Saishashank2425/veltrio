@@ -130,8 +130,8 @@ export default function AgentHub() {
       let reply = "";
       let cards = false;
 
-      const budgetMatch = clean.match(/(?:under|below|less than|within|budget(?: of)?|₹|rs\.?\s*)(?:₹|rs\.?\s*)?([\d,]+)/i);
-      const budget = budgetMatch ? Number(budgetMatch[1].replace(/,/g, "")) : undefined;
+      const budgetMatch = clean.match(/(?:under|below|less than|within|budget(?: of)?|₹|rs\.?\s*)(?:₹|rs\.?\s*)?([\d,]+(?:\.\d+)?)\s*(k|thousand)?/i);
+      const budget = budgetMatch ? Number(budgetMatch[1].replace(/,/g, "")) * (/^(k|thousand)$/i.test(budgetMatch[2] || "") ? 1000 : 1) : undefined;
       const shoppingIntent = /\b(find|search|show|recommend|suggest|buy|shop|looking for|best|compare|under ₹|under rs|smartwatch|watch|phone|laptop|headphone|earphone|earbud|shoes|shoe|tablet|monitor|camera|keyboard|mouse|product|price of)\b/.test(low);
       const trackingIntent = /\b(track|price alert|price drop|notify me|target price|price tracking|alert me)\b/.test(low);
       const approvalIntent = /\b(buy it|purchase it|place order|checkout|pay for|order it|buy the|purchase the)\b/.test(low);
