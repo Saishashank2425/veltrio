@@ -32,9 +32,10 @@ Open http://localhost:3000.
 npm run test:gateway
 npx tsc --noEmit
 npm run build
+npm run test:e2e
 ```
 
-GitHub Actions runs gateway tests, TypeScript checks and a production build for pushes to `main`, the polish branch and pull requests targeting `main`.
+GitHub Actions runs gateway regression tests, TypeScript checks, a production build, and production API smoke tests for pushes to `main`, the polish branch, and pull requests targeting `main`.
 
 ## Authorization policy
 
