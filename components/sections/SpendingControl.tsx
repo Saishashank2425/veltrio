@@ -126,9 +126,9 @@ export function SpendingControl() {
           >
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-sm font-semibold text-ivory/80 tracking-wide">
-                Active Rules
+                Example policy rules
               </h3>
-              <span className="text-xs text-ivory/30">{rules.length} rules</span>
+              <span className="text-xs text-ivory/30">Sample data</span>
             </div>
             {rules.map((rule, i) => (
               <motion.div
