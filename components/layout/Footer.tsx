@@ -2,7 +2,11 @@ import Link from "next/link";
 
 const footerLinks = [
   { label: "How it works", href: "#how-it-works" },
-  { label: "Demo", href: "/demo" },
+  { label: "Agent Hub", href: "/agents" },
+  { label: "Product search", href: "/shop" },
+  { label: "Spending mandates", href: "/mandates" },
+  { label: "Finance workspace", href: "/finance" },
+  { label: "Authorization demo", href: "/demo" },
   { label: "Trust & Security", href: "#trust" },
 ];
 
@@ -14,7 +18,7 @@ export function Footer() {
           {/* Brand */}
           <div className="flex flex-col items-center md:items-start gap-1">
             <span className="text-ivory font-semibold tracking-tight">Veltrio</span>
-            <p className="text-xs text-ivory/40">Commerce moves. You stay in control.</p>
+            <p className="text-xs text-ivory/40">AI commerce, with explicit policy checks.</p>
           </div>
 
           {/* Links */}
