@@ -41,7 +41,8 @@ function parseMandate(raw: string): ParsedMandate {
   const isBlockedCategory = (category: string) => new RegExp("(?:block|never|do not buy|exclude)\\s+(?:\\w+\\s+){0,2}" + category, "i").test(text);
   const categories = knownCategories.filter(category => lower.includes(category) && !isBlockedCategory(category));
   const blockedCategories = knownCategories.filter(isBlockedCategory);
-  const merchantMatch = text.match(/(?:only at|only from|allow(?:ed)? merchants?|allowlist|approved stores?)\s*[:=]?\s*([^.;\n]*?)(?=,\s*(?:max(?:imum)?|limit|block|never|ask|require|approval|monthly|expire|valid for)\b|[.;\n]|$)/i);
+  const merchantMatch = text.match(/(?:only at|only from|allow(?:ed)? merchants?|allowlist|approved stores?)\s*[:=]?\s*([^.;\n]*?)(?=,\s*(?:max(?:imum)?|limit|block|never|ask|require|approval|monthly|expire|valid for)\b|[.;\n]|$)/i)
+    || (/\bonly allow\b/i.test(text) ? text.match(/\bfrom\s+([^.;\n]*?)(?=,\s*(?:max(?:imum)?|limit|block|never|ask|require|approval|monthly|expire|valid for)\b|[.;\n]|$)/i) : null);
   const blockedMatch = text.match(/(?:never at|block(?:ed)? merchants?|do not buy from|exclude stores?)\s*[:=]?\s*([^.;\n]*?)(?=,\s*(?:max(?:imum)?|limit|allow|only|ask|require|approval|monthly|expire|valid for)\b|[.;\n]|$)/i);
   const splitNames = (s?: string) => s ? s.split(/,|\band\b/i).map(x => x.trim()).filter(Boolean).slice(0, 12) : [];
   const allowedMerchants = splitNames(merchantMatch?.[1]);
