@@ -28,9 +28,7 @@ export function ProblemBridge() {
           transition={{ delay: 0.15, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="mt-6 text-base text-ivory/60 max-w-xl mx-auto leading-relaxed"
         >
-          Most authorization frameworks are probabilistic — they guess. Veltrio
-          is deterministic. Every rule is a hard contract. Pass means spend.
-          Fail means stop. No exceptions, no interpretation.
+          Veltrio is designed around deterministic policy checks: the same proposal and configured rules should produce the same decision. This prototype demonstrates the decision layer without connecting a live payment rail.
         </motion.p>
       </div>
     </section>
