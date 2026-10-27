@@ -6,6 +6,7 @@ const footerLinks = [
   { label: "Product search", href: "/shop" },
   { label: "Spending mandates", href: "/mandates" },
   { label: "Authorization demo", href: "/demo" },
+  { label: "PayPal sandbox checkout", href: "/checkout" },
   { label: "Finance workspace", href: "/finance" },
   { label: "Trust & security", href: "/#trust" },
 ];
