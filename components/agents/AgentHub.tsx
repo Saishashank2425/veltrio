@@ -77,7 +77,7 @@ export default function AgentHub() {
       if (raw) {
         const saved = JSON.parse(raw);
         if (Array.isArray(saved.conversations) && saved.conversations.length) setConversations(saved.conversations);
-        if (Array.isArray(saved.agents) && saved.agents.length) setAgents(saved.agents);
+        if (Array.isArray(saved.agents) && saved.agents.length) {\n          const iconById: Record<string, string> = { shopping: "SH", amazon: "AM", flipkart: "FK", headphones: "HF", food: "FD", subscriptions: "SB", stocks: "IV", finance: "FN" };\n          setAgents(saved.agents.map((item: Agent) => ({ ...item, icon: iconById[item.id] ?? (/^[A-Z]{1,3}$/.test(item.icon) ? item.icon : "CA") })));\n        }
       }
     } catch { /* keep starter data if local storage is unavailable */ }
   }, []);
