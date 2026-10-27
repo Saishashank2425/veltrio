@@ -6,7 +6,7 @@ import { ArrowLeft, ArrowRight, Check, CircleAlert, Clock3, LockKeyhole, Plus, S
 
 type Mandate = {
   id: string; name: string; purpose: string; maxPerTransaction: number | null; monthlyBudget: number | null;
-  currency: "INR" | "USD"; allowedMerchants: string[]; blockedMerchants: string[]; categories: string[];
+  currency: "INR" | "USD"; allowedMerchants: string[]; blockedMerchants: string[]; categories: string[]; blockedCategories: string[];
   approvalAbove: number | null; expiresInDays: number | null; confidence: "high" | "medium" | "low"; needsClarification: string[];
   createdAt: string;
 };
@@ -74,7 +74,7 @@ export default function MandatesClient() {
             <dl className="mt-5 grid grid-cols-2 gap-3">{[
               ["Per purchase",money(draft.maxPerTransaction,draft.currency)],["Monthly budget",money(draft.monthlyBudget,draft.currency)],["Approval above",money(draft.approvalAbove,draft.currency)],["Expires after",draft.expiresInDays?draft.expiresInDays+" days":"Not specified"]
             ].map(([label,value])=><div key={label} className="rounded-xl border border-[#edf0f4] bg-[#fafbfc] p-3"><dt className="text-[10px] font-medium uppercase tracking-wider text-[#98a2b3]">{label}</dt><dd className="mt-1 text-sm font-semibold text-[#172033]">{value}</dd></div>)}</dl>
-            <div className="mt-4 space-y-3">{[["Categories",draft.categories],["Allowed merchants",draft.allowedMerchants],["Blocked merchants",draft.blockedMerchants]].map(([label,values])=><div key={label as string}><p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-[#667085]">{label}</p><div className="flex flex-wrap gap-1.5">{(values as string[]).length?(values as string[]).map(value=><span key={value} className="rounded-full bg-[#eef2ff] px-2.5 py-1 text-[11px] text-[#315bff]">{value}</span>):<span className="text-xs text-[#98a2b3]">None detected</span>}</div></div>)}</div>
+            <div className="mt-4 space-y-3">{[["Categories mentioned",draft.categories],["Blocked categories",draft.blockedCategories],["Allowed merchants",draft.allowedMerchants],["Blocked merchants",draft.blockedMerchants]].map(([label,values])=><div key={label as string}><p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-[#667085]">{label}</p><div className="flex flex-wrap gap-1.5">{(values as string[]).length?(values as string[]).map(value=><span key={value} className="rounded-full bg-[#eef2ff] px-2.5 py-1 text-[11px] text-[#315bff]">{value}</span>):<span className="text-xs text-[#98a2b3]">None detected</span>}</div></div>)}</div>
             {!!draft.needsClarification.length&&<div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3"><p className="mb-1 flex items-center gap-2 text-xs font-semibold text-amber-800"><CircleAlert size={14}/> Please clarify</p>{draft.needsClarification.map(item=><p key={item} className="text-xs leading-5 text-amber-800">{item}</p>)}</div>}
             <button onClick={saveMandate} className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#172033] px-4 text-sm font-semibold text-white transition hover:bg-[#26334b]"><Check size={16}/> Save mandate locally</button>
             <p className="mt-2 text-[10px] leading-4 text-[#98a2b3]">Saving does not activate gateway enforcement. Confirm all extracted values before use.</p>
