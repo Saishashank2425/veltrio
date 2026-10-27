@@ -37,7 +37,7 @@ function GatewayDiagram() {
         <text x="240" y="108" textAnchor="middle" fill="#315BFF" fontSize="10" fontWeight="700" letterSpacing="0.05em">GATEWAY</text>
         <text x="240" y="124" textAnchor="middle" fill="#111827" fontSize="9" opacity="0.6">checks rules</text>
         <text x="240" y="138" textAnchor="middle" fill="#111827" fontSize="9" opacity="0.6">deterministically</text>
-        <text x="240" y="152" textAnchor="middle" fill="#111827" fontSize="8" opacity="0.4">≤ 2ms</text>
+        <text x="240" y="152" textAnchor="middle" fill="#111827" fontSize="8" opacity="0.4">demo rules</text>
 
         {/* Approved node */}
         <rect x="340" y="44" width="120" height="52" rx="8" fill="#FFFFFF" stroke="#16794B" strokeWidth="1" strokeOpacity="0.7" />
