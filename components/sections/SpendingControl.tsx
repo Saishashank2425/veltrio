@@ -110,8 +110,7 @@ export function SpendingControl() {
             Rules that can be inspected.
           </h2>
           <p className="mt-4 text-ivory/50 max-w-lg text-base">
-            Define the constraints once. Every agent — every transaction —
-            runs through the same gateway. No discretion, no drift.
+            These sample rules illustrate the policy model. Saved mandate drafts and real transactions are not connected to this panel in the current prototype.
           </p>
         </div>
 
