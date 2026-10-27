@@ -39,12 +39,14 @@ test("escalates subscriptions for human approval", () => {
   assert.equal(result.triggeringRule?.ruleId, "R002");
 });
 test("escalates when projected travel spend slightly exceeds its budget", () => {
-  const result = gateway.authorize(proposal({ vendor: "Marriott", category: "Travel", amount: 800 }));
+  gateway.monthlySpend.Travel = 1700;
+  const result = gateway.authorize(proposal({ vendor: "Marriott", category: "Travel", amount: 400 }));
   assert.equal(result.decision, "ESCALATE");
   assert.equal(result.triggeringRule?.ruleId, "R004");
 });
 test("blocks when projected category spend exceeds 110% of budget", () => {
-  const result = gateway.authorize(proposal({ vendor: "Staples", category: "Operating Expenses", amount: 800 }));
+  gateway.monthlySpend["Operating Expenses"] = 5300;
+  const result = gateway.authorize(proposal({ vendor: "Staples", category: "Operating Expenses", amount: 200 }));
   assert.equal(result.decision, "BLOCK");
   assert.equal(result.triggeringRule?.ruleId, "R004");
 });
