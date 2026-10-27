@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { authorize, validateProposal, type PurchaseProposal } from "@/lib/gateway";
 import { getPayPalAccessToken, paypalConfigured, paypalRequest } from "@/lib/paypal";
 
-export const runtime = "nodejs";
-
 type PayPalOrder = {
   id?: string;
   status?: string;
