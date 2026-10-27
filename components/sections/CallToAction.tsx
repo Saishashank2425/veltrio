@@ -24,9 +24,9 @@ export function CallToAction() {
           </div>
 
           <h2 className="text-4xl sm:text-5xl font-bold text-ivory tracking-tight leading-tight">
-            Ready to authorize
+            See the authorization flow
             <br />
-            the future?
+            in action.
           </h2>
 
           <p className="text-ivory/50 text-base leading-relaxed max-w-md mx-auto">
@@ -42,7 +42,7 @@ export function CallToAction() {
           </Link>
 
           <p className="text-xs text-ivory/25 tracking-wide">
-            No credit card · No commitment · Hackathon demo
+            Prototype environment · Sample policy data · No real payments
           </p>
         </motion.div>
       </div>
