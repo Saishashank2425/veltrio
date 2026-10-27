@@ -20,8 +20,12 @@ function parsePrice(value: unknown): { amount: number | null; currency: string |
   }
   const label = String(value).trim();
   const amount = typeof value === "number" ? value : Number(label.replace(/[^\d.]/g, ""));
-  const currency = label.match(/₹|INR/i) ? "INR" : label.match(/\$|USD/i) ? "USD" : null;
-  return { amount: Number.isFinite(amount) && amount > 0 ? amount : null, currency, label: label || null };
+  const detectedCurrency = label.match(/₹|INR/i) ? "INR" : label.match(/\$|USD/i) ? "USD" : null;
+  const currency = detectedCurrency ?? (Number.isFinite(amount) && amount > 0 ? "INR" : null);
+  const displayLabel = label && !detectedCurrency && Number.isFinite(amount) && amount > 0
+    ? \`₹\${amount.toLocaleString("en-IN")}\`
+    : label;
+  return { amount: Number.isFinite(amount) && amount > 0 ? amount : null, currency, label: displayLabel || null };
 }
 
 export async function GET(request: NextRequest) {
@@ -86,7 +90,7 @@ export async function GET(request: NextRequest) {
       }];
     });
 
-    const filtered = budget ? results.filter((item) => item.amount === null || item.amount <= budget) : results;
+    const filtered = budget ? results.filter((item) => item.amount !== null && item.currency === "INR" && item.amount <= budget) : results;
     return NextResponse.json({
       configured: true,
       provider: "Google Shopping via SerpApi",
