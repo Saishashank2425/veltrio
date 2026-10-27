@@ -15,12 +15,6 @@ type ParsedMandate = {
   needsClarification: string[];
 };
 
-function money(text: string): number | null {
-  const match = text.match(/(?:₹|rs\.?\s*|inr\s*)([\d,]+(?:\.\d+)?)|([\d,]+(?:\.\d+)?)\s*(?:rupees|inr|rs\b)/i);
-  if (!match) return null;
-  const value = Number((match[1] || match[2]).replace(/,/g, ""));
-  return Number.isFinite(value) && value > 0 ? value : null;
-}
 
 function parseMandate(raw: string): ParsedMandate {
   const text = raw.trim();
