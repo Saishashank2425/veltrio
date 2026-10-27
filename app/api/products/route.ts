@@ -23,7 +23,7 @@ function parsePrice(value: unknown): { amount: number | null; currency: string |
   const detectedCurrency = label.match(/₹|INR/i) ? "INR" : label.match(/\$|USD/i) ? "USD" : null;
   const currency = detectedCurrency ?? (Number.isFinite(amount) && amount > 0 ? "INR" : null);
   const displayLabel = label && !detectedCurrency && Number.isFinite(amount) && amount > 0
-    ? \`₹\${amount.toLocaleString("en-IN")}\`
+    ? "₹" + amount.toLocaleString("en-IN")
     : label;
   return { amount: Number.isFinite(amount) && amount > 0 ? amount : null, currency, label: displayLabel || null };
 }
