@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
-import { ArrowLeft, ArrowRight, Check, CircleAlert, Clock3, LockKeyhole, Plus, ShieldCheck, Trash2, WalletCards } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CircleAlert, Clock3, LockKeyhole, Plus, ShieldCheck, Trash2, WalletCards } from "lucide-react";\nimport { PageGuide } from "@/components/ui/PageGuide";
 
 type Mandate = {
   id: string; name: string; purpose: string; maxPerTransaction: number | null; monthlyBudget: number | null;
@@ -55,7 +55,7 @@ export default function MandatesClient() {
         </div>
         <div className="rounded-2xl border border-[#dfe4eb] bg-white p-4 shadow-sm"><div className="flex items-center gap-2 text-xs font-semibold"><LockKeyhole size={15} className="text-[#315bff]"/> You stay in control</div><p className="mt-2 max-w-[240px] text-xs leading-5 text-[#667085]">Mandates are saved in this browser only. They are not yet enforced by the payment gateway.</p></div>
       </div>
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_.9fr]">
+      <PageGuide eyebrow="Spending policy" title="Why mandates exist" purpose="A mandate turns broad instructions into visible limits and restrictions so a person can review them before an agent proposes a purchase. It is the policy-design step, not payment execution." steps={["Describe the allowed spend in plain language.","Inspect extracted limits and merchant rules.","Correct anything that was misunderstood.","Save the reviewed draft in this browser."]} note="Mandates are currently browser-local and are not enforced by the authorization gateway. Treat them as drafts, not active financial controls." compact links={[{label:"Test the gateway separately",href:"/demo"},{label:"Return to Agent Hub",href:"/agents"}]} />\n      <div className="grid gap-6 lg:grid-cols-[1.1fr_.9fr]">
         <section className="rounded-3xl border border-[#e4e7ec] bg-white p-5 shadow-[0_10px_35px_rgba(16,24,40,.04)] sm:p-7">
           <div className="mb-5 flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#eef2ff] text-[#315bff]"><WalletCards size={20}/></span><div><h2 className="text-lg font-semibold">Create from natural language</h2><p className="text-xs text-[#667085]">Write rules the way you would tell a trusted assistant.</p></div></div>
           <form onSubmit={parse}>
