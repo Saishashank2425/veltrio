@@ -44,6 +44,28 @@ const baseProposal = {
 try {
   await waitForServer();
 
+  const mandateResponse = await fetch(`${base}/api/mandates/parse`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ text: "Allow my shopping agent to buy electronics under ₹5,000 per purchase, with a monthly budget of ₹12,000. Ask me to approve anything above ₹3,000. Valid for 30 days." }),
+  });
+  await assertStatus(mandateResponse, 200, "POST /api/mandates/parse");
+  const mandateBody = await mandateResponse.json();
+  if (mandateBody.mandate?.maxPerTransaction !== 5000) throw new Error("Mandate parser should extract ₹5,000 per-purchase cap.");
+  if (mandateBody.mandate?.monthlyBudget !== 12000) throw new Error("Mandate parser should extract ₹12,000 monthly budget.");
+  if (mandateBody.mandate?.approvalAbove !== 3000) throw new Error("Mandate parser should extract ₹3,000 approval threshold.");
+  if (mandateBody.mandate?.expiresInDays !== 30) throw new Error("Mandate parser should extract 30-day expiry.");
+
+  const invalidMandateResponse = await fetch(`${base}/api/mandates/parse`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ text: "bad" }),
+  });
+  await assertStatus(invalidMandateResponse, 422, "Invalid mandate");
+
+  const invalidProductResponse = await fetch(`${base}/api/products?q=x`);
+  await assertStatus(invalidProductResponse, 400, "Invalid product query");
+
   const rulesResponse = await fetch(`${base}/api/rules`);
   await assertStatus(rulesResponse, 200, "GET /api/rules");
   const rules = await rulesResponse.json();
@@ -73,7 +95,7 @@ try {
   const afterReset = await (await fetch(`${base}/api/authorize`)).json();
   if (afterReset.count !== 0) throw new Error("Reset should clear audit history.");
 
-  console.log("Production API smoke tests passed: rules, ALLOW, BLOCK, ESCALATE, validation, audit, reset.");
+  console.log("Production API smoke tests passed: mandate parsing, product-query validation, rules, ALLOW, BLOCK, ESCALATE, validation, audit, reset.");
 } catch (error) {
   console.error(error);
   process.exitCode = 1;
