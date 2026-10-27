@@ -134,6 +134,7 @@ export default function AgentHub() {
       const budget = budgetMatch ? Number(budgetMatch[1].replace(/,/g, "")) * (/^(k|thousand)$/i.test(budgetMatch[2] || "") ? 1000 : 1) : undefined;
       const shoppingIntent = /\b(find|search|show|recommend|suggest|buy|shop|looking for|best|compare|under ₹|under rs|smartwatch|watch|phone|laptop|headphone|earphone|earbud|shoes|shoe|tablet|monitor|camera|keyboard|mouse|product|price of)\b/.test(low);
       const trackingIntent = /\b(track|price alert|price drop|notify me|target price|price tracking|alert me)\b/.test(low);
+      const mandateIntent = /\\b(mandate|spending rules|purchase rules|spending limit|purchase limit|allow my agent|only allow|ask me before|require approval|approval threshold)\\b/.test(low);
       const approvalIntent = /\b(buy it|purchase it|place order|checkout|pay for|order it|buy the|purchase the)\b/.test(low);
       const financeIntent = /\b(subscription|emi|bill|spending|finance|expense|budget summary)\b/.test(low);
       const foodIntent = /\b(pizza|food delivery|restaurant|order food|domino|burger)\b/.test(low);
@@ -144,7 +145,7 @@ export default function AgentHub() {
         .replace(/\s+/g, " ").trim();
 
       try {
-        if (approvalIntent) {
+        if (mandateIntent) {\n          reply = "I can turn those instructions into a structured spending-mandate draft. Open Mandates from the top navigation, describe your rules, review the extracted limits and merchant restrictions, then save them. Saved mandates are currently stored in this browser and are not yet enforced by the authorization gateway.";\n        } else if (approvalIntent) {
           reply = "I can prepare the purchase for authorization, but I haven't placed an order. Select the exact product and retailer first. Veltrio's deterministic gateway must then check the transaction against your mandate; if approval is required, you'll need to approve it explicitly. Real payment execution is not connected in this demo.";
         } else if (trackingIntent) {
           const hasTarget = /₹\s*[\d,]+|\b[\d,]+\s*(?:rupees|rs)\b/i.test(clean);
