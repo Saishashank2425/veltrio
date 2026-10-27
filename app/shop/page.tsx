@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { ArrowLeft, ArrowUpRight, ExternalLink, Search, ShieldCheck, ShoppingBag, SlidersHorizontal, Sparkles } from "lucide-react";
 
 const retailers = [
@@ -32,7 +32,7 @@ export default function ShopPage() {
     return ["google", "amazon", "flipkart"].includes(retailer.id);
   });
 
-  function submitSearch(event: React.FormEvent<HTMLFormElement>) {
+  function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!query.trim()) return;
     setSearched(true);
