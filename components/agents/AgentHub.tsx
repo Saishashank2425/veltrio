@@ -13,7 +13,7 @@ import { PageGuide } from "@/components/ui/PageGuide";
 
 type Agent = { id: string; name: string; kind: string; icon: string; description: string; tools: string[]; status: string };
 type ProductCard = { id: string; title: string; price: string | null; image: string | null; url: string; retailer: string | null; rating: number | null; reviews: number | null; delivery: string | null };
-type Message = { id: string; role: "user" | "assistant"; text: string; products?: ProductCard[]; time: string };
+type Message = { id: string; role: "user" | "assistant"; text: string; products?: ProductCard[]; listingCount?: number; time: string };
 type Conversation = { id: string; title: string; agentId: string; messages: Message[]; updated: number };
 
 const defaultTools = [
@@ -121,6 +121,7 @@ export default function AgentHub() {
       const isFollowUp = /\b(it|that|those|them|which one|the first|the second|compare|best one|more details)\b/.test(low);
       let reply = "";
       let productCards: ProductCard[] | undefined;
+      let listingCount: number | undefined;
 
       const budgetMatch = clean.match(/(?:under|below|less than|within|budget(?: of)?|₹|rs\.?\s*)(?:₹|rs\.?\s*)?([\d,]+(?:\.\d+)?)\s*(k|thousand)?/i);
       const budget = budgetMatch ? Number(budgetMatch[1].replace(/,/g, "")) * (/^(k|thousand)$/i.test(budgetMatch[2] || "") ? 1000 : 1) : undefined;
@@ -162,8 +163,10 @@ export default function AgentHub() {
             const intro = budget
               ? `I found ${results.length} product listing(s) that match your search and budget of ₹${budget.toLocaleString("en-IN")}. Here's a quick shortlist:`
               : `I found ${results.length} product listing(s) for your search. Here's a quick shortlist:`;
+            listingCount = results.length;
             productCards = results.slice(0, 6).map((p: ProductCard, index: number) => ({ ...p, id: p.id || `${index}-${p.title}` }));
-            reply = `${intro} I’ve displayed the listings as product cards below, including images where the provider supplies them. Prices and availability can change, so confirm the final details with the retailer. Tell me what matters most—design, comfort, durability, or value—and I’ll compare the shortlist around that.`;
+            const shownCount = productCards.length;
+            reply = `${intro} I’m showing ${shownCount} of the ${results.length} listings here so you can review them without a crowded wall of results. Open a retailer listing to confirm its current price, availability, specifications, and return policy.\n\nWhat matters most: design, comfort, durability, or value for money? I can help compare the details available in the listings, and I’ll flag anything that can’t be verified. A product being within budget does not by itself authorize a purchase—review your spending mandate before checkout.`;
           } else {
             reply = `I understand you're looking for ${query || "a product"}${budget ? ` under ₹${budget.toLocaleString("en-IN")}` : ""}. ${typeof data.message === "string" ? data.message : "Live product results aren't available from the connected source right now."} You can still open Product search to search retailer listings. If you share your top priorities, I'll help you compare the specifications and trade-offs without inventing prices or ratings.`;
           }
@@ -176,7 +179,7 @@ export default function AgentHub() {
         reply = "I understood your request, but the connected product search couldn't be reached just now. You can retry from Product search. I won't make up live prices, ratings, availability, or claim that an action was completed.";
       }
 
-      const assistantMessage: Message = { id: id(), role: "assistant", text: reply, time: now(), products: productCards };
+      const assistantMessage: Message = { id: id(), role: "assistant", text: reply, time: now(), products: productCards, listingCount };
       patchConversation(active.id, (c) => ({ ...c, messages: [...c.messages, assistantMessage], updated: Date.now() }));
       setStatus("Waiting for you");
     }, 250);
@@ -265,6 +268,20 @@ export default function AgentHub() {
                               </div>
                             </article>
                           ))}
+                        </div>
+                      )}
+                      {m.role === "assistant" && m.products && m.products.length > 0 && (
+                        <div className="mt-3 rounded-xl border border-[#e3e9f7] bg-[#f8faff] p-4">
+                          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                            <p className="text-xs font-semibold text-[#253b75]">Your shortlist</p>
+                            <p className="text-[11px] text-[#667085]">Showing {m.products.length} of {m.listingCount ?? m.products.length} listings</p>
+                          </div>
+                          <p className="mt-1 text-xs leading-5 text-[#667085]">Compare the available price, retailer, rating, and delivery details. Missing specifications are not assumed.</p>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <Link href="/mandates" className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-[#315bff] px-3 text-xs font-semibold text-white hover:bg-[#2446d8]"><ShieldCheck size={13}/> Review spending rules</Link>
+                            <Link href="/demo" className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[#d8e0f5] bg-white px-3 text-xs font-semibold text-[#344054] hover:bg-[#f1f5ff]"><ShieldCheck size={13}/> Test authorization</Link>
+                          </div>
+                          <p className="mt-2 text-[10px] leading-4 text-[#667085]">These actions review your rules and test the gateway demo; they do not place an order or charge a payment method.</p>
                         </div>
                       )}
                       {m.role === "assistant" && <div className="mt-2 flex items-center gap-3 px-1 text-[10px] text-[#98a2b3]"><span>{m.time}</span><span>·</span><span>Veltrio agent</span></div>}
