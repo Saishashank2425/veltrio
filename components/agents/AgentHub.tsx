@@ -164,8 +164,9 @@ export default function AgentHub() {
               ? `I found ${results.length} product listing(s) that match your search and budget of ₹${budget.toLocaleString("en-IN")}. Here's a quick shortlist:`
               : `I found ${results.length} product listing(s) for your search. Here's a quick shortlist:`;
             listingCount = results.length;
-            productCards = results.slice(0, 6).map((p: ProductCard, index: number) => ({ ...p, id: p.id || `${index}-${p.title}` }));
-            const shownCount = productCards.length;
+            const cards = results.slice(0, 6).map((p: ProductCard, index: number) => ({ ...p, id: p.id || `${index}-${p.title}` }));
+            productCards = cards;
+            const shownCount = cards.length;
             reply = `${intro} I’m showing ${shownCount} of the ${results.length} listings here so you can review them without a crowded wall of results. Open a retailer listing to confirm its current price, availability, specifications, and return policy.\n\nWhat matters most: design, comfort, durability, or value for money? I can help compare the details available in the listings, and I’ll flag anything that can’t be verified. A product being within budget does not by itself authorize a purchase—review your spending mandate before checkout.`;
           } else {
             reply = `I understand you're looking for ${query || "a product"}${budget ? ` under ₹${budget.toLocaleString("en-IN")}` : ""}. ${typeof data.message === "string" ? data.message : "Live product results aren't available from the connected source right now."} You can still open Product search to search retailer listings. If you share your top priorities, I'll help you compare the specifications and trade-offs without inventing prices or ratings.`;
