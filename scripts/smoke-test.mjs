@@ -77,6 +77,17 @@ try {
   });
   await assertStatus(invalidMandateResponse, 422, "Invalid mandate");
 
+  const mixedCurrencyResponse = await fetch(`${base}/api/mandates/parse`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ text: "Allow purchases up to ₹5,000 per order and $50 per month." }),
+  });
+  await assertStatus(mixedCurrencyResponse, 200, "Mixed-currency mandate");
+  const mixedCurrencyMandate = (await mixedCurrencyResponse.json()).mandate;
+  if (!mixedCurrencyMandate?.needsClarification?.some(note => /confirm the currency/i.test(note))) {
+    throw new Error("Mixed INR and USD instructions must require explicit currency clarification.");
+  }
+
   const invalidProductResponse = await fetch(`${base}/api/products?q=x`);
   await assertStatus(invalidProductResponse, 400, "Invalid product query");
 
