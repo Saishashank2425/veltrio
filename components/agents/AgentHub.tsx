@@ -125,7 +125,7 @@ export default function AgentHub() {
 
       const budgetMatch = clean.match(/(?:under|below|less than|within|budget(?: of)?|₹|rs\.?\s*)(?:₹|rs\.?\s*)?([\d,]+(?:\.\d+)?)\s*(k|thousand)?/i);
       const budget = budgetMatch ? Number(budgetMatch[1].replace(/,/g, "")) * (/^(k|thousand)$/i.test(budgetMatch[2] || "") ? 1000 : 1) : undefined;
-      const shoppingIntent = /\b(find|search|show|recommend|suggest|buy|shop|looking for|best|compare|under ₹|under rs|smartwatch|watch|phone|laptop|headphone|earphone|earbud|shoes|shoe|tablet|monitor|camera|keyboard|mouse|product|price of)\b/.test(low);
+      const shoppingIntent = /\b(find|search|show|recommend|suggest|buy|shop|looking for|best|compare|under|below|wireless|smartwatches?|watches?|phones?|laptops?|headphones?|earphones?|earbuds?|shoes?|tablets?|monitors?|cameras?|keyboards?|mice|mouse|products?|price of)\b/.test(low);
       const trackingIntent = /\b(track|price alert|price drop|notify me|target price|price tracking|alert me)\b/.test(low);
       const mandateIntent = /\b(mandate|spending rules|purchase rules|spending limit|purchase limit|allow my .*agent|spend up to|per purchase|monthly budget|ask me to approve|only allow|ask me before|require approval|approval threshold)\b/.test(low);
       const approvalIntent = /\b(buy it|purchase it|place order|checkout|pay for|order it|buy the|purchase the)\b/.test(low);
@@ -133,8 +133,8 @@ export default function AgentHub() {
       const foodIntent = /\b(pizza|food delivery|restaurant|order food|domino|burger)\b/.test(low);
       const productSearchTerm = clean
         .replace(/\b(find|search for|show me|recommend|suggest|please|can you|could you|help me find|best)\b/gi, " ")
-        .replace(/\b(under|below|less than|within my budget|with good|with|and|please)\b/gi, " ")
-        .replace(/₹\s*[\d,]+|rs\.?\s*[\d,]+|\b[\d,]+\s*(?:rupees|rs)\b/gi, " ")
+        .replace(/\b(under|below|less than|within my budget|with good|with|and|please|budget(?: of)?)\b/gi, " ")
+        .replace(/₹\s*[\d,]+|rs\.?\s*[\d,]+|\b[\d,]+\s*(?:rupees|rs|k|thousand)\b/gi, " ")
         .replace(/\s+/g, " ").trim();
 
       try {
@@ -169,7 +169,9 @@ export default function AgentHub() {
             const shownCount = cards.length;
             reply = `${intro} I’m showing ${shownCount} of the ${results.length} listings here so you can review them without a crowded wall of results. Open a retailer listing to confirm its current price, availability, specifications, and return policy.\n\nWhat matters most: design, comfort, durability, or value for money? I can help compare the details available in the listings, and I’ll flag anything that can’t be verified. A product being within budget does not by itself authorize a purchase—review your spending mandate before checkout.`;
           } else {
-            reply = `I understand you're looking for ${query || "a product"}${budget ? ` under ₹${budget.toLocaleString("en-IN")}` : ""}. ${typeof data.message === "string" ? data.message : "Live product results aren't available from the connected source right now."} You can still open Product search to search retailer listings. If you share your top priorities, I'll help you compare the specifications and trade-offs without inventing prices or ratings.`;
+            reply = data.configured === false
+              ? `I recognised this as a product search: “${query || "a product"}”${budget ? ` with a ₹${budget.toLocaleString("en-IN")} budget` : ""}. Live product cards are unavailable because no product-data provider is configured. ${typeof data.message === "string" ? data.message : "Configure Channel3 or SerpApi in the server environment, then retry."} You can still open Product search to search retailer sites.`
+              : `I searched for “${query || "a product"}”${budget ? ` under ₹${budget.toLocaleString("en-IN")}` : ""}, but the provider returned no matching listings. Try a shorter query or open Product search to compare retailer results. I won't invent prices, ratings, or availability.`;
           }
         } else if (/\b(hello|hi\b|hey|good morning|good evening)\b/.test(low)) {
           reply = "Hey! What are you trying to get done? I can help you discover and compare products, think through a purchase, define price targets, or review spending. Ask naturally—I'll adapt the answer to your request. I'll also be clear about which tools are actually connected.";
