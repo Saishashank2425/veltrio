@@ -157,7 +157,7 @@ export default function AgentHub() {
           (isFollowUp && /shopping|product|watch|headphone|laptop|phone/.test(historyText)) ||
           // Product Research and Purchase Planner should treat a natural-language task
           // as a shopping request even when the wording doesn't match a keyword.
-          (agent.tools.includes("shopping") && !/\\b(hello|hi\\b|hey|good morning|good evening)\\b/.test(low))
+          (agent.tools.includes("shopping") && !/\b(hello|hi\b|hey|good morning|good evening)\b/.test(low))
         ) {
           const query = productSearchTerm || clean;
           setStatus("Searching products");
