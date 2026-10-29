@@ -152,7 +152,13 @@ export default function AgentHub() {
           reply = "I can help compare menu options and prepare an order. A live menu and ordering integration isn't connected, so I can't verify availability or place the order. Tell me the dish, serving size, budget, and preferred restaurant, and I'll help narrow down the choices.";
         } else if (financeIntent) {
           reply = "I can help organise your spending, bills, EMIs, and subscriptions using records saved in Veltrio Finance on this browser. Those records are local to this browser; bank access, account syncing, and payment execution aren't connected. What would you like to review first?";
-        } else if (shoppingIntent || (isFollowUp && /shopping|product|watch|headphone|laptop|phone/.test(historyText))) {
+        } else if (
+          shoppingIntent ||
+          (isFollowUp && /shopping|product|watch|headphone|laptop|phone/.test(historyText)) ||
+          // Product Research and Purchase Planner should treat a natural-language task
+          // as a shopping request even when the wording doesn't match a keyword.
+          (agent.tools.includes("shopping") && !/\\b(hello|hi\\b|hey|good morning|good evening)\\b/.test(low))
+        ) {
           const query = productSearchTerm || clean;
           setStatus("Searching products");
           const params = new URLSearchParams({ q: query });
