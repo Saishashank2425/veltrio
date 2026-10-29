@@ -18,13 +18,17 @@ export async function GET() {
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
+      "https://generativelanguage.googleapis.com/v1beta/interactions",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": apiKey,
+        },
         body: JSON.stringify({
-          contents: [{ role: "user", parts: [{ text: "Reply with the single word OK." }] }],
-          generationConfig: { temperature: 0, maxOutputTokens: 8 },
+          model: "gemini-3.8-flash",
+          input: "Reply with the single word OK.",
+          store: false,
         }),
         cache: "no-store",
         signal: AbortSignal.timeout(10000),
@@ -51,9 +55,12 @@ export async function GET() {
     }
 
     const payload = await response.json() as {
-      candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+      output_text?: string;
+      output?: Array<{ type?: string; text?: string; content?: Array<{ type?: string; text?: string }> }>;
     };
-    const reply = payload.candidates?.[0]?.content?.parts?.map(part => part.text ?? "").join("").trim();
+    const reply = (payload.output_text ?? payload.output?.flatMap(item =>
+      item.type === "text" && item.text ? [item.text] : (item.content ?? []).map(part => part.text ?? "")
+    ).join("")).trim();
     if (!reply) {
       return NextResponse.json({
         ok: false,
