@@ -114,7 +114,7 @@ async function parseWithGemini(text: string): Promise<{ draft: ParsedMandate | n
     };
     const raw = (payload.output_text ?? payload.output?.flatMap(item =>
       item.type === "text" && item.text ? [item.text] : (item.content ?? []).map(part => part.text ?? "")
-    ).join("")).trim();
+    ).join("") ?? "").trim();
     if (!raw) return { draft: null, reason: "Gemini returned an empty response; deterministic extraction was used." };
     const value = JSON.parse(raw) as Partial<ParsedMandate>;
     const positiveOrNull = (n: unknown) => typeof n === "number" && Number.isFinite(n) && n > 0 ? n : null;
