@@ -29,9 +29,10 @@ export async function GET() {
           model: "gemini-3.8-flash",
           input: "Reply with the single word OK.",
           store: false,
+          generation_config: { thinking_level: "low", max_output_tokens: 16 },
         }),
         cache: "no-store",
-        signal: AbortSignal.timeout(10000),
+        signal: AbortSignal.timeout(25000),
       },
     );
 
