@@ -92,10 +92,10 @@ async function parseWithGemini(text: string): Promise<{ draft: ParsedMandate | n
         model: "gemini-3.8-flash",
         input: prompt,
         store: false,
-        generation_config: { temperature: 0.1 },
+        generation_config: { thinking_level: "low", max_output_tokens: 1200 },
       }),
       cache: "no-store",
-      signal: AbortSignal.timeout(9000),
+      signal: AbortSignal.timeout(20000),
     });
     if (!response.ok) {
       let detail = "";
