@@ -29,6 +29,7 @@ export default function MandatesClient() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [parserMode, setParserMode] = useState("deterministic-v1");
+  const [fallbackReason, setFallbackReason] = useState("");
   const [storageReady, setStorageReady] = useState(false);
 
   useEffect(() => {
@@ -46,7 +47,7 @@ export default function MandatesClient() {
   }
 
   async function parse(e: FormEvent) {
-    e.preventDefault(); setError(""); setNotice(""); setDraft(null);
+    e.preventDefault(); setError(""); setNotice(""); setDraft(null); setFallbackReason("");
     if (text.trim().length < 8) { setError("Tell us a little more about what your agent can buy."); return; }
     setLoading(true);
     try {
@@ -57,7 +58,8 @@ export default function MandatesClient() {
       if (!parsed || typeof parsed !== "object") throw new Error("We couldn't create a draft. Please try again.");
       setDraft(parsed);
       setParserMode(typeof data.parser === "string" ? data.parser : "deterministic-v1");
-      setNotice(data.aiAssisted ? "Draft ready. Please check the amounts and restrictions before saving." : "A basic draft is ready. Check each field carefully; some instructions may need manual correction.");
+      setFallbackReason(typeof data.fallbackReason === "string" ? data.fallbackReason : "");
+      setNotice(data.aiAssisted ? "Gemini responded successfully. Please check the amounts and restrictions before saving." : "Gemini was not used for this draft. Check the fields carefully before saving.");
     } catch (err) { setError(err instanceof Error ? err.message : "We couldn't create a draft. Please try again."); }
     finally { setLoading(false); }
   }
@@ -118,7 +120,7 @@ export default function MandatesClient() {
           {!draft ? <div className="grid min-h-72 place-items-center rounded-2xl border border-dashed border-[#d0d5dd] bg-[#fafbfc] p-6 text-center"><div><PencilLine size={28} className="mx-auto text-[#98a2b3]"/><p className="mt-3 text-sm font-semibold text-[#475467]">Your rule summary will appear here</p><p className="mt-1 max-w-xs text-xs leading-5 text-[#98a2b3]">Start with a sentence on the left. We’ll do the extraction, then you can review the details.</p></div></div> :
           <div>
             <div className="rounded-2xl bg-[#f7f8ff] p-4"><div className="flex items-center gap-2 text-xs font-semibold text-[#315bff]"><Sparkles size={14}/>{isAi ? "AI-assisted draft" : "Basic draft"}</div><h3 className="mt-2 text-base font-semibold">{draft.name}</h3><p className="mt-1 text-xs leading-5 text-[#667085]">{draft.purpose}</p></div>
-            {!isAi && <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-800">Some wording may not have been understood automatically. Please check each field and fix anything that looks wrong.</p>}
+            {!isAi && <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-800"><strong>Gemini is not connected for this request.</strong> {fallbackReason || "A deterministic fallback parser created this draft."} Please review every field manually.</p>}
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <label className="rounded-xl border border-[#e4e7ec] p-3"><span className="block text-[11px] font-medium text-[#667085]">Maximum per purchase ({draft.currency})</span><input aria-label="Maximum per purchase" type="number" min="1" step="any" value={amountInput(draft.maxPerTransaction)} onChange={e => updateDraft("maxPerTransaction", parseAmount(e.target.value))} placeholder="Set a limit" className="mt-2 w-full rounded-lg border border-[#d0d5dd] px-3 py-2 text-sm font-semibold outline-none focus:border-[#315bff]"/></label>
               <label className="rounded-xl border border-[#e4e7ec] p-3"><span className="block text-[11px] font-medium text-[#667085]">Total monthly budget ({draft.currency})</span><input aria-label="Monthly budget" type="number" min="1" step="any" value={amountInput(draft.monthlyBudget)} onChange={e => updateDraft("monthlyBudget", parseAmount(e.target.value))} placeholder="Optional limit" className="mt-2 w-full rounded-lg border border-[#d0d5dd] px-3 py-2 text-sm font-semibold outline-none focus:border-[#315bff]"/></label>
