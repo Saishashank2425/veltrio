@@ -135,6 +135,7 @@ export default function AgentHub() {
         .replace(/\b(find|search for|show me|recommend|suggest|please|can you|could you|help me find|best)\b/gi, " ")
         .replace(/\b(under|below|less than|within my budget|with good|with|and|please|budget(?: of)?)\b/gi, " ")
         .replace(/₹\s*[\d,]+|rs\.?\s*[\d,]+|\b[\d,]+\s*(?:rupees|rs|k|thousand)\b/gi, " ")
+        .replace(budgetMatch ? /\b[\d,]+(?:\.\d+)?\s*(?:k|thousand)?\b/gi : /$^/, " ")
         .replace(/\s+/g, " ").trim();
 
       try {
