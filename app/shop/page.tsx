@@ -55,7 +55,7 @@ export default function ShopPage() {
     const normalizedQuery = searchTerm
       .replace(/\b(?:under|below|less than|up to|max(?:imum)?(?: budget)?(?: of)?)\s*₹?\s*[\d,]+(?:\.\d+)?\s*(?:k|thousand)?\b/ig, " ")
       .replace(/\s+/g, " ").trim() || searchTerm.trim();
-    setQuery(searchTerm);
+    setQuery(normalizedQuery);
     if (!budget.trim() && parsedInlineBudget) setBudget(String(parsedInlineBudget));
     setSearched(true);
     setLoading(true);
