@@ -20,7 +20,10 @@ type ParsedMandate = {
 function parseMandate(raw: string): ParsedMandate {
   const text = raw.trim();
   const lower = text.toLowerCase();
-  const currency: "INR" | "USD" = /\$|\busd\b|\bdollars?\b/i.test(text) && !/₹|\binr\b|\brupees?\b/i.test(text) ? "USD" : "INR";
+  const hasUsdCue = /\$|\busd\b|\bdollars?\b/i.test(text);
+  const hasInrCue = /₹|\binr\b|\brupees?\b|\brs\.?\s*\d/i.test(text);
+  const mixedCurrencyCues = hasUsdCue && hasInrCue;
+  const currency: "INR" | "USD" = hasUsdCue && !hasInrCue ? "USD" : "INR";
 
   const allAmounts = [...text.matchAll(/(?:₹|rs\.?\s*|inr\s*|\$\s*)([\d,]+(?:\.\d+)?)|\b([\d,]+(?:\.\d+)?)\s*(?:rupees|inr|rs\b|dollars?|usd)\b/gi)]
     .map(m => Number((m[1] || m[2]).replace(/,/g, "")))
@@ -52,7 +55,7 @@ function parseMandate(raw: string): ParsedMandate {
   const needsClarification: string[] = [];
   if (!maxPerTransaction && !monthlyBudget) needsClarification.push("Set a maximum per-purchase amount or a monthly budget.");
   if (/only|allowlist|approved merchants?|never at|block merchants?/i.test(text) && !allowedMerchants.length && !blockedMerchants.length) needsClarification.push("Specify the exact merchant names for your store restrictions.");
-  if (currency === "USD" && /₹|inr|rupees?/i.test(text)) needsClarification.push("Confirm the currency; the request contains mixed currency cues.");
+  if (mixedCurrencyCues) needsClarification.push("Confirm the currency; the request contains both INR and USD amounts.");
 
   const confidence = needsClarification.length ? "low" : (categories.length || allowedMerchants.length || blockedMerchants.length || approvalAbove || expiresInDays) ? "high" : "medium";
   return {
@@ -100,7 +103,12 @@ async function parseWithGemini(text: string): Promise<ParsedMandate | null> {
     const positiveOrNull = (n: unknown) => typeof n === "number" && Number.isFinite(n) && n > 0 ? n : null;
     const names = (items: unknown) => Array.isArray(items) ? items.filter((item): item is string => typeof item === "string").map(item => item.trim()).filter(Boolean).slice(0, 12) : [];
     const needsClarification = names(value.needsClarification);
-    const currency = value.currency === "USD" ? "USD" : "INR";
+    const hasUsdCue = /\$|\busd\b|\bdollars?\b/i.test(text);
+    const hasInrCue = /₹|\binr\b|\brupees?\b|\brs\.?\s*\d/i.test(text);
+    const currency = value.currency === "USD" && !hasInrCue ? "USD" : "INR";
+    if (hasUsdCue && hasInrCue && !needsClarification.some(note => /confirm the currency/i.test(note))) {
+      needsClarification.push("Confirm the currency; the request contains both INR and USD amounts.");
+    }
     if (!needsClarification.length && !positiveOrNull(value.maxPerTransaction) && !positiveOrNull(value.monthlyBudget)) {
       needsClarification.push("Set a maximum per-purchase amount or a monthly budget.");
     }
