@@ -47,15 +47,24 @@ export default function ShopPage() {
 
   async function runSearch(searchTerm = query) {
     if (!searchTerm.trim()) return;
+    const inlineBudget = searchTerm.match(/\b(?:under|below|less than|up to|max(?:imum)?(?: budget)?(?: of)?)\s*₹?\s*([\d,]+(?:\.\d+)?)\s*(k|thousand)?\b/i);
+    const parsedInlineBudget = inlineBudget
+      ? Number(inlineBudget[1].replace(/,/g, "")) * (/^(k|thousand)$/i.test(inlineBudget[2] || "") ? 1000 : 1)
+      : null;
+    const effectiveBudget = budget.trim() ? budget.trim() : parsedInlineBudget && Number.isFinite(parsedInlineBudget) ? String(parsedInlineBudget) : "";
+    const normalizedQuery = searchTerm
+      .replace(/\b(?:under|below|less than|up to|max(?:imum)?(?: budget)?(?: of)?)\s*₹?\s*[\d,]+(?:\.\d+)?\s*(?:k|thousand)?\b/ig, " ")
+      .replace(/\s+/g, " ").trim() || searchTerm.trim();
     setQuery(searchTerm);
+    if (!budget.trim() && parsedInlineBudget) setBudget(String(parsedInlineBudget));
     setSearched(true);
     setLoading(true);
     setSearchError("");
     setProviderMessage("");
     setProducts([]);
     try {
-      const params = new URLSearchParams({ q: searchTerm.trim() });
-      if (budget.trim()) params.set("budget", budget.trim());
+      const params = new URLSearchParams({ q: normalizedQuery });
+      if (effectiveBudget) params.set("budget", effectiveBudget);
       const response = await fetch(`/api/products?${params.toString()}`, { cache: "no-store" });
       const data = await response.json();
       if (!response.ok) throw new Error(typeof data.error === "string" ? data.error : "Product search failed.");
