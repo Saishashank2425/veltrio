@@ -60,7 +60,7 @@ export async function GET() {
     };
     const reply = (payload.output_text ?? payload.output?.flatMap(item =>
       item.type === "text" && item.text ? [item.text] : (item.content ?? []).map(part => part.text ?? "")
-    ).join("")).trim();
+    ).join("") ?? "").trim();
     if (!reply) {
       return NextResponse.json({
         ok: false,
