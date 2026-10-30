@@ -83,7 +83,7 @@ export default function MandatesClient() {
   }
 
   function removeMandate(id: string) { persist(mandates.filter(m => m.id !== id)); }
-  const isAi = parserMode === "gemini-2.5-flash";
+  const isAi = parserMode.startsWith("gemini-");
 
   return <main className="min-h-screen bg-[#f6f7fb] px-4 pb-16 pt-24 text-[#172033] sm:px-6">
     <div className="mx-auto max-w-6xl">
