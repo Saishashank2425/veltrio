@@ -9,7 +9,7 @@ export function getPool(): Pool {
   if (!globalForPool.veltrioPool) {
     globalForPool.veltrioPool = new Pool({
       connectionString: process.env.DATABASE_URL,
-      ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : undefined,
+      ssl: process.env.PGSSLMODE === "disable" ? false : process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : undefined,
       max: 5,
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 5_000,
