@@ -44,6 +44,21 @@ export interface AuthorizationResult {
   durationMs: number;
 }
 
+export interface PurchaseMandate {
+  id: string;
+  name: string;
+  purpose: string;
+  maxPerTransaction: number | null;
+  monthlyBudget: number | null;
+  currency: "INR" | "USD";
+  allowedMerchants: string[];
+  blockedMerchants: string[];
+  categories: string[];
+  blockedCategories: string[];
+  approvalAbove: number | null;
+  expiresAt: string | null;
+}
+
 /* ============================================================
    In-memory spend tracking
    Resets on server restart (demo only — no persistence).
@@ -121,12 +136,43 @@ export const POLICY = {
 /* ============================================================
    Rule evaluators
    ============================================================ */
-type RuleEvaluator = (p: PurchaseProposal) => RuleResult;
+type RuleEvaluator = (p: PurchaseProposal, mandate?: PurchaseMandate | null) => RuleResult;
 
 const RULES: RuleEvaluator[] = [
+  /* M001 — Active saved mandate */
+  (p, mandate) => {
+    if (!mandate) return { ruleId: "M001", ruleName: "Saved Mandate", outcome: "ESCALATE", reason: "No saved mandate is active. Save a mandate before allowing checkout." };
+    if (mandate.expiresAt && Date.parse(mandate.expiresAt) <= Date.now()) return { ruleId: "M001", ruleName: "Saved Mandate", outcome: "BLOCK", reason: `Mandate “${mandate.name}” has expired.` };
+    if (mandate.currency !== (p.currency ?? "USD")) return { ruleId: "M001", ruleName: "Saved Mandate", outcome: "BLOCK", reason: `Mandate currency ${mandate.currency} does not match purchase currency ${p.currency ?? "USD"}.` };
+    const merchant = p.vendor.trim().toLocaleLowerCase();
+    const allowed = mandate.allowedMerchants.map(value => value.trim().toLocaleLowerCase());
+    const blocked = mandate.blockedMerchants.map(value => value.trim().toLocaleLowerCase());
+    if (blocked.includes(merchant)) return { ruleId: "M001", ruleName: "Saved Mandate", outcome: "BLOCK", reason: `Merchant “${p.vendor}” is blocked by mandate “${mandate.name}”.` };
+    if (allowed.length && !allowed.includes(merchant)) return { ruleId: "M001", ruleName: "Saved Mandate", outcome: "BLOCK", reason: `Merchant “${p.vendor}” is not allowed by mandate “${mandate.name}”.` };
+    const category = p.category.trim().toLocaleLowerCase();
+    const matchesCategory = (value: string) => {
+      const normalized = value.trim().toLocaleLowerCase();
+      const mapped = normalized === "software & saas" ? ["software", "subscriptions"]
+        : normalized === "operating expenses" ? ["operating expenses", "office"]
+          : [normalized];
+      return mapped.some(item => category.includes(item) || p.description.toLocaleLowerCase().includes(item));
+    };
+    if (mandate.blockedCategories.some(matchesCategory)) return { ruleId: "M001", ruleName: "Saved Mandate", outcome: "BLOCK", reason: `Category “${p.category}” is blocked by mandate “${mandate.name}”.` };
+    if (mandate.categories.length && !mandate.categories.some(matchesCategory)) return { ruleId: "M001", ruleName: "Saved Mandate", outcome: "BLOCK", reason: `Category “${p.category}” is not allowed by mandate “${mandate.name}”.` };
+    if (mandate.maxPerTransaction !== null && p.amount > mandate.maxPerTransaction) return { ruleId: "M001", ruleName: "Saved Mandate", outcome: "BLOCK", reason: `Purchase amount exceeds the mandate limit of ${mandate.currency} ${mandate.maxPerTransaction}.` };
+    if (mandate.approvalAbove !== null && p.amount > mandate.approvalAbove) return { ruleId: "M001", ruleName: "Saved Mandate", outcome: "ESCALATE", reason: `Mandate “${mandate.name}” requires approval above ${mandate.currency} ${mandate.approvalAbove}.` };
+    if (mandate.monthlyBudget !== null) {
+      const spent = Object.values(monthlySpend).reduce((total, value) => total + value, 0);
+      if (spent + p.amount > mandate.monthlyBudget) return { ruleId: "M001", ruleName: "Saved Mandate", outcome: "BLOCK", reason: `This purchase would exceed mandate “${mandate.name}” monthly budget of ${mandate.currency} ${mandate.monthlyBudget}.` };
+    }
+    return { ruleId: "M001", ruleName: "Saved Mandate", outcome: "ALLOW", reason: `Purchase matches active mandate “${mandate.name}”.` };
+  },
   /* R001 — Vendor allowlist */
-  (p) => {
-    if (!POLICY.ALLOWED_VENDORS.has(p.vendor)) {
+  (p, mandate) => {
+    const explicitlyMandatedVendor = mandate?.allowedMerchants.some(
+      merchant => merchant.trim().toLocaleLowerCase() === p.vendor.trim().toLocaleLowerCase(),
+    ) ?? false;
+    if (!POLICY.ALLOWED_VENDORS.has(p.vendor) && !explicitlyMandatedVendor) {
       return {
         ruleId: "R001",
         ruleName: "Vendor Allowlist",
@@ -244,14 +290,14 @@ const RULES: RuleEvaluator[] = [
 /* ============================================================
    Core authorization function (exported for testing)
    ============================================================ */
-export function authorize(proposal: PurchaseProposal, options: { recordSpend?: boolean } = {}): AuthorizationResult {
+export function authorize(proposal: PurchaseProposal, options: { recordSpend?: boolean; mandate?: PurchaseMandate | null } = {}): AuthorizationResult {
   const start = Date.now();
   const rulesEvaluated: RuleResult[] = [];
   let triggeringRule: RuleResult | null = null;
   let finalDecision: Decision = "ALLOW";
 
   for (const rule of RULES) {
-    const result = rule(proposal);
+    const result = rule(proposal, options.mandate);
     rulesEvaluated.push(result);
 
     if (result.outcome === "BLOCK") {

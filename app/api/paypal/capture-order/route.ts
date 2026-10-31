@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { recordSpend } from "@/lib/gateway";
+import { ownsAuthorization, recordPayPalCapture } from "@/lib/persistence";
+import { getSessionId, setSessionCookie } from "@/lib/session";
 import { getPayPalAccessToken, paypalConfigured, paypalRequest } from "@/lib/paypal";
 
 type PayPalOrder = {
@@ -13,6 +14,7 @@ type PayPalOrder = {
 };
 
 export async function POST(request: NextRequest) {
+  const session = getSessionId(request);
   let body: unknown;
   try {
     body = await request.json();
@@ -35,28 +37,21 @@ export async function POST(request: NextRequest) {
     if (!unit?.custom_id?.startsWith("veltrio-demo|")) {
       return NextResponse.json({ error: "This order was not created by the Veltrio demo." }, { status: 403 });
     }
+    const [, rawCategory, authorizationId] = unit.custom_id.split("|");
+    if (!authorizationId || !await ownsAuthorization(session.id, authorizationId)) {
+      return NextResponse.json({ error: "This order is not linked to an authorization in this browser session." }, { status: 403 });
+    }
     if (unit.amount?.currency_code !== "USD" || !unit.amount.value) {
       return NextResponse.json({ error: "Order currency or amount is not supported by this demo." }, { status: 422 });
     }
 
-    // A completed order is idempotently acknowledged; never record its spend twice.
-    if (existing.status === "COMPLETED") {
-      return NextResponse.json({
-        configured: true,
-        status: "COMPLETED",
-        orderId,
-        amount: unit.amount.value,
-        currency: "USD",
-        alreadyCaptured: true,
-        message: "This sandbox order was already captured.",
-      });
-    }
-    if (existing.status !== "APPROVED") {
+    if (existing.status !== "COMPLETED" && existing.status !== "APPROVED") {
       return NextResponse.json({ error: `Order is not approved for capture (status: ${existing.status ?? "unknown"}).` }, { status: 409 });
     }
 
-    const captured = await paypalRequest<PayPalOrder>(`/v2/checkout/orders/${encodeURIComponent(orderId)}/capture`, accessToken, {
+    const captured = existing.status === "COMPLETED" ? existing : await paypalRequest<PayPalOrder>(`/v2/checkout/orders/${encodeURIComponent(orderId)}/capture`, accessToken, {
       method: "POST",
+      headers: { "PayPal-Request-Id": `veltrio-capture-${orderId}` },
       body: JSON.stringify({}),
     });
     const captureUnit = captured.purchase_units?.[0];
@@ -69,23 +64,27 @@ export async function POST(request: NextRequest) {
       }, { status: 409 });
     }
 
-    const category = unit.custom_id.split("|").slice(1).join("|");
+    const category = rawCategory || "Operating Expenses";
     const amount = Number(capture.amount?.value ?? unit.amount.value);
-    if (!Number.isFinite(amount) || amount <= 0) {
+    const authorizedAmount = Number(unit.amount.value);
+    const captureCurrency = capture.amount?.currency_code ?? unit.amount.currency_code;
+    if (!Number.isFinite(amount) || amount <= 0 || Math.round(amount * 100) !== Math.round(authorizedAmount * 100) || captureCurrency !== "USD") {
       return NextResponse.json({ error: "PayPal returned an invalid captured amount." }, { status: 502 });
     }
-    recordSpend(category, amount);
+    const record = await recordPayPalCapture(session.id, { orderId, captureId: capture.id ?? orderId, category, amount, currency: "USD", authorizationId });
 
-    return NextResponse.json({
+    return setSessionCookie(NextResponse.json({
       configured: true,
       status: "COMPLETED",
       orderId,
       captureId: capture.id ?? null,
       amount: amount.toFixed(2),
       currency: capture.amount?.currency_code ?? "USD",
-      alreadyCaptured: false,
-      message: "PayPal sandbox confirmed the capture. The demo spend counter has been updated.",
-    });
+      alreadyCaptured: record.alreadyRecorded || existing.status === "COMPLETED",
+      message: record.alreadyRecorded || existing.status === "COMPLETED"
+        ? "PayPal sandbox confirmed this capture; its spend was already recorded."
+        : "PayPal sandbox confirmed the capture. Spend was recorded once.",
+    }), session);
   } catch (error) {
     return NextResponse.json({
       error: error instanceof Error ? error.message : "Unable to capture the PayPal sandbox order.",

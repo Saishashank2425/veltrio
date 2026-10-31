@@ -18,7 +18,7 @@ const steps = [
     icon: Shield,
     title: "Gateway checks your rules",
     description:
-      "The deterministic demo evaluates the proposal against configured sample rules and returns a clear decision. The current prototype does not connect saved mandates to the gateway.",
+      "The deterministic gateway checks the proposal against your active saved mandate and the configured policy rules before returning a clear decision.",
   },
   {
     step: 3,

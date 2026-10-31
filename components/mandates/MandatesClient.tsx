@@ -8,10 +8,10 @@ type Mandate = {
   id: string; name: string; purpose: string; maxPerTransaction: number | null; monthlyBudget: number | null;
   currency: "INR" | "USD"; allowedMerchants: string[]; blockedMerchants: string[]; categories: string[]; blockedCategories: string[];
   approvalAbove: number | null; expiresInDays: number | null; confidence: "high" | "medium" | "low"; needsClarification: string[];
-  createdAt: string;
+  createdAt: string; active: boolean; expiresAt: string | null;
 };
-type Draft = Omit<Mandate, "id" | "createdAt">;
-const STORAGE_KEY = "veltrio-mandates-v1";
+type Draft = Omit<Mandate, "id" | "createdAt" | "active" | "expiresAt">;
+const LEGACY_STORAGE_KEY = "veltrio-mandates-v1";
 const examples = [
   { title: "Everyday shopping", text: "Allow shopping purchases up to ₹3,000 each, with a total monthly budget of ₹10,000. Ask me before purchases above ₹2,000. Valid for 30 days." },
   { title: "Groceries only", text: "Only allow groceries from BigBasket and Amazon Fresh, up to ₹2,000 per order. Block subscriptions and ask me before purchases above ₹1,000. Valid for 30 days." },
@@ -33,17 +33,41 @@ export default function MandatesClient() {
   const [storageReady, setStorageReady] = useState(false);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setMandates(JSON.parse(raw));
-    } catch { setError("Saved items could not be loaded from this browser."); }
-    finally { setStorageReady(true); }
+    void refreshMandates();
   }, []);
 
-  function persist(next: Mandate[]) {
-    setMandates(next);
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); }
-    catch { setError("Browser storage is unavailable. Your changes may not remain after you leave this page."); }
+  async function refreshMandates() {
+    try {
+      const response = await fetch("/api/mandates", { cache: "no-store" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Saved mandates could not be loaded.");
+      let saved = Array.isArray(data.mandates) ? data.mandates as Mandate[] : [];
+      const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (legacy) {
+        const oldItems = JSON.parse(legacy) as Array<Record<string, unknown>>;
+        if (saved.length === 0 && Array.isArray(oldItems)) {
+          for (const item of [...oldItems].reverse()) {
+            const savedExpiry = typeof item.expiresAt === "string" ? Date.parse(item.expiresAt)
+              : typeof item.createdAt === "string" && typeof item.expiresInDays === "number"
+                ? Date.parse(item.createdAt) + item.expiresInDays * 86_400_000 : NaN;
+            const expiresAt = Number.isFinite(savedExpiry) && savedExpiry <= Date.now() ? NaN : savedExpiry;
+            const expiresInDays = Number.isFinite(expiresAt) && expiresAt > Date.now() ? Math.ceil((expiresAt - Date.now()) / 86_400_000) : null;
+            const migrated = await fetch("/api/mandates", {
+              method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ ...item, expiresInDays, confidence: item.confidence ?? "medium", needsClarification: item.needsClarification ?? [] }),
+            });
+            if (!migrated.ok) throw new Error("An older browser-saved mandate could not be migrated. Please review and save it again.");
+          }
+          const refreshed = await fetch("/api/mandates", { cache: "no-store" });
+          const refreshedData = await refreshed.json();
+          if (!refreshed.ok) throw new Error(refreshedData.error || "Migrated mandates could not be loaded.");
+          saved = refreshedData.mandates;
+        }
+        localStorage.removeItem(LEGACY_STORAGE_KEY);
+      }
+      setMandates(saved);
+    } catch (err) { setError(err instanceof Error ? err.message : "Saved mandates could not be loaded."); }
+    finally { setStorageReady(true); }
   }
 
   async function parse(e: FormEvent) {
@@ -68,7 +92,7 @@ export default function MandatesClient() {
     setDraft(current => current ? { ...current, [key]: value } : current);
   }
 
-  function saveMandate() {
+  async function saveMandate() {
     if (!draft) return;
     const invalidAmount = [draft.maxPerTransaction, draft.monthlyBudget, draft.approvalAbove].some(n => n !== null && (!Number.isFinite(n) || n <= 0));
     if (invalidAmount) { setError("Amounts must be greater than zero, or left blank."); return; }
@@ -77,12 +101,25 @@ export default function MandatesClient() {
     }
     if (!draft.maxPerTransaction && !draft.monthlyBudget) { setError("Add a per-purchase limit or a monthly budget before saving."); return; }
     if (draft.needsClarification.length) { setError("Please resolve the clarification notes before saving this draft."); return; }
-    const item: Mandate = { ...draft, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
-    persist([item, ...mandates]); setDraft(null); setText(""); setError("");
-    setNotice("Saved on this browser. This is a draft, not an active payment control.");
+    setLoading(true);
+    try {
+      const response = await fetch("/api/mandates", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...draft, id: crypto.randomUUID() }) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Mandate could not be saved.");
+      await refreshMandates(); setDraft(null); setText(""); setError("");
+      setNotice("Saved as the active mandate. It now applies to authorization and checkout.");
+    } catch (err) { setError(err instanceof Error ? err.message : "Mandate could not be saved."); }
+    finally { setLoading(false); }
   }
 
-  function removeMandate(id: string) { persist(mandates.filter(m => m.id !== id)); }
+  async function removeMandate(id: string) {
+    try {
+      const response = await fetch(`/api/mandates?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Mandate could not be deleted.");
+      await refreshMandates(); setNotice("Saved mandate removed.");
+    } catch (err) { setError(err instanceof Error ? err.message : "Mandate could not be deleted."); }
+  }
   const isAi = parserMode.startsWith("gemini-");
 
   return <main className="min-h-screen bg-[#f6f7fb] px-4 pb-16 pt-24 text-[#172033] sm:px-6">
@@ -96,7 +133,7 @@ export default function MandatesClient() {
         </div>
         <div className="flex max-w-md gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
           <LockKeyhole size={18} className="mt-0.5 shrink-0 text-amber-700"/>
-          <div><p className="text-xs font-semibold text-amber-900">Important: these are saved drafts</p><p className="mt-1 text-xs leading-5 text-amber-800">This prototype saves rules in this browser. They do not yet control the live payment gateway.</p></div>
+          <div><p className="text-xs font-semibold text-amber-900">The latest saved mandate is active</p><p className="mt-1 text-xs leading-5 text-amber-800">It is stored in Veltrio’s database and checked before authorization and PayPal sandbox checkout.</p></div>
         </div>
       </header>
 
@@ -136,15 +173,15 @@ export default function MandatesClient() {
             {!!draft.needsClarification.length && <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3"><p className="mb-1 flex items-center gap-2 text-xs font-semibold text-amber-800"><CircleAlert size={14}/> One thing to check</p>{draft.needsClarification.map(item => <p key={item} className="text-xs leading-5 text-amber-800">{item}</p>)}</div>}
             <button onClick={saveMandate} className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#172033] px-4 text-sm font-semibold text-white transition hover:bg-[#26334b]"><Check size={16}/> Save my rules</button>
             <button onClick={() => { setDraft(null); setError(""); }} className="mt-2 w-full rounded-xl px-4 py-2 text-xs font-semibold text-[#667085] hover:bg-[#f2f4f7]">Start over</button>
-            <p className="mt-2 text-center text-[10px] leading-4 text-[#98a2b3]">Saving keeps a copy in this browser only. It does not activate payment protection.</p>
+            <p className="mt-2 text-center text-[10px] leading-4 text-[#98a2b3]">Saving activates this mandate for future gateway checks. Review every extracted field before saving.</p>
           </div>}
         </section>
       </div>
 
       <section className="mt-8 rounded-3xl border border-[#e4e7ec] bg-white p-5 shadow-sm sm:p-7">
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-semibold">Your saved rules</h2><p className="mt-1 text-xs text-[#667085]">{storageReady ? mandates.length + (mandates.length === 1 ? " saved rule" : " saved rules") : "Loading saved rules…"}</p></div><span className="inline-flex items-center gap-2 rounded-full bg-[#f2f4f7] px-3 py-1.5 text-[10px] font-semibold text-[#667085]"><Clock3 size={13}/> Saved on this browser</span></div>
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-semibold">Your saved rules</h2><p className="mt-1 text-xs text-[#667085]">{storageReady ? mandates.length + (mandates.length === 1 ? " saved rule" : " saved rules") : "Loading saved rules…"}</p></div><span className="inline-flex items-center gap-2 rounded-full bg-[#f2f4f7] px-3 py-1.5 text-[10px] font-semibold text-[#667085]"><Clock3 size={13}/> Stored in PostgreSQL</span></div>
         {!mandates.length ? <div className="rounded-2xl border border-dashed border-[#d0d5dd] p-8 text-center"><p className="text-sm font-medium text-[#475467]">No saved rules yet</p><p className="mt-1 text-xs text-[#98a2b3]">Once you create and review a rule, it will appear here.</p></div> :
-        <div className="grid gap-3 md:grid-cols-2">{mandates.map(m => <article key={m.id} className="rounded-2xl border border-[#e4e7ec] p-4"><div className="flex items-start justify-between gap-3"><div><h3 className="text-sm font-semibold">{m.name}</h3><p className="mt-1 text-xs leading-5 text-[#667085]">{m.purpose}</p></div><button onClick={() => removeMandate(m.id)} aria-label={"Delete " + m.name} className="rounded-lg p-2 text-[#98a2b3] hover:bg-rose-50 hover:text-rose-600"><Trash2 size={15}/></button></div><div className="mt-3 flex flex-wrap gap-2 text-[11px]"><span className="rounded-lg bg-[#f2f4f7] px-2.5 py-1.5">Per purchase: {money(m.maxPerTransaction, m.currency)}</span><span className="rounded-lg bg-[#f2f4f7] px-2.5 py-1.5">Monthly: {money(m.monthlyBudget, m.currency)}</span></div><p className="mt-3 text-[10px] font-semibold text-amber-700">Draft only · Not enforced at checkout</p></article>)}</div>}
+        <div className="grid gap-3 md:grid-cols-2">{mandates.map(m => <article key={m.id} className="rounded-2xl border border-[#e4e7ec] p-4"><div className="flex items-start justify-between gap-3"><div><div className="flex items-center gap-2"><h3 className="text-sm font-semibold">{m.name}</h3>{m.active && <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">Active</span>}</div><p className="mt-1 text-xs leading-5 text-[#667085]">{m.purpose}</p></div><button onClick={() => removeMandate(m.id)} aria-label={"Delete " + m.name} className="rounded-lg p-2 text-[#98a2b3] hover:bg-rose-50 hover:text-rose-600"><Trash2 size={15}/></button></div><div className="mt-3 flex flex-wrap gap-2 text-[11px]"><span className="rounded-lg bg-[#f2f4f7] px-2.5 py-1.5">Per purchase: {money(m.maxPerTransaction, m.currency)}</span><span className="rounded-lg bg-[#f2f4f7] px-2.5 py-1.5">Monthly: {money(m.monthlyBudget, m.currency)}</span></div><p className="mt-3 text-[10px] font-semibold text-emerald-700">{m.active ? "Enforced by the authorization gateway" : "Saved history"}</p></article>)}</div>}
       </section>
       <div className="mt-6 flex flex-wrap justify-center gap-3"><Link href="/agents" className="inline-flex items-center gap-2 rounded-xl border border-[#d0d5dd] bg-white px-4 py-2.5 text-xs font-semibold text-[#344054] hover:bg-[#f9fafb]"><ArrowLeft size={14}/> Back to shopping assistant</Link><Link href="/demo" className="inline-flex items-center gap-2 rounded-xl bg-[#172033] px-4 py-2.5 text-xs font-semibold text-white hover:bg-[#26334b]">Explore the gateway demo <ArrowRight size={14}/></Link></div>
       {notice && <div role="status" className="fixed bottom-5 left-1/2 z-50 -translate-x-1/2 rounded-xl bg-[#172033] px-4 py-3 text-xs text-white shadow-xl">{notice}</div>}

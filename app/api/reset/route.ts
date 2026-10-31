@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
-import { resetDemoState } from "@/lib/gateway";
 
-/** Reset only in-memory demo counters and audit history; not a production control. */
+/** Persistent mandate, decision, and spend history is intentionally not resettable from a public endpoint. */
 export async function POST() {
-  resetDemoState();
-  return NextResponse.json({ ok: true, message: "Demo state reset." });
+  return NextResponse.json({ error: "Persistent authorization and spend history cannot be reset through the public demo API." }, { status: 410 });
 }

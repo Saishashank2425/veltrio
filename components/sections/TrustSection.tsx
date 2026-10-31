@@ -15,7 +15,7 @@ const principles = [
     icon: Users,
     title: "You set the rules. We enforce them.",
     description:
-      "The intended design is to evaluate a configured policy rather than invent a reason to spend. The current demo uses sample policy rules; saved mandate drafts are not connected to it.",
+      "Every proposal is evaluated against deterministic policy rules and the active saved mandate. A blocked or escalated request cannot proceed to PayPal checkout.",
   },
   {
     icon: BookOpen,

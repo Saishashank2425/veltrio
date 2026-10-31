@@ -140,7 +140,7 @@ export default function AgentHub() {
 
       try {
         if (mandateIntent) {
-          reply = "I can turn those instructions into a structured spending-mandate draft. Open Mandates from the top navigation, describe your rules, review the extracted limits and merchant restrictions, then save them. Saved mandates are currently stored in this browser and are not yet enforced by the authorization gateway.";
+          reply = "I can turn those instructions into a structured spending mandate. Open Mandates from the top navigation, describe your rules, review every extracted limit and merchant restriction, then save them. Your latest saved mandate is checked by the deterministic authorization gateway and PayPal sandbox checkout.";
         } else if (approvalIntent) {
           reply = "I can prepare the purchase for authorization, but I haven't placed an order. Select the exact product and retailer first. Veltrio's deterministic gateway must then check the transaction against your mandate; if approval is required, you'll need to approve it explicitly. Real payment execution is not connected in this demo.";
         } else if (trackingIntent) {
