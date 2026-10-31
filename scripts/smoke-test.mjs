@@ -106,11 +106,11 @@ try {
   if (!Array.isArray(rules.rules) || rules.rules.length !== 6) throw new Error("Expected the saved mandate rule and five policy rules.");
 
   const mandateId = crypto.randomUUID();
-  const mandateResponse = await apiFetch("/api/mandates", {
+  const saveMandateResponse = await apiFetch("/api/mandates", {
     method: "POST", headers: { "content-type": "application/json" },
     body: JSON.stringify({ id: mandateId, name: "Smoke test mandate", purpose: "Temporary smoke test policy", maxPerTransaction: 100, monthlyBudget: null, currency: "USD", allowedMerchants: [], blockedMerchants: [], categories: [], blockedCategories: [], approvalAbove: 80, expiresInDays: 1, confidence: "high", needsClarification: [] }),
   });
-  await assertStatus(mandateResponse, 201, "Save persistent mandate");
+  await assertStatus(saveMandateResponse, 201, "Save persistent mandate");
   const savedMandates = await (await apiFetch("/api/mandates")).json();
   if (!savedMandates.mandates?.some(item => item.id === mandateId && item.active)) throw new Error("Saved mandate was not returned as active from PostgreSQL.");
   const isolatedMandates = await (await fetch(`${base}/api/mandates`)).json();
