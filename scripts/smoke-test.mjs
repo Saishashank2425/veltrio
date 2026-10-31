@@ -136,7 +136,7 @@ try {
   const auditBefore = (await auditBeforeResponse.json()).count;
   const auditResponse = await apiFetch("/api/authorize");
   await assertStatus(auditResponse, 200, "GET /api/authorize");
-  if ((await auditResponse.json()).count !== auditBefore + 3) throw new Error("Authorization audit history should retain each valid decision.");
+  if (auditBefore < 3 || (await auditResponse.json()).count !== auditBefore) throw new Error("Authorization audit history should retain each valid decision without changing on read.");
 
   const blockedByMandate = await postProposal({ ...baseProposal, amount: 101 });
   await assertStatus(blockedByMandate, 403, "Active mandate per-purchase cap");
