@@ -11,14 +11,17 @@ export async function GET() {
     return NextResponse.json({
       ok: false,
       provider: "Gemini",
-      model,
+      model: "gemini-3.8-flash",
       configured: false,
       message: "GEMINI_API_KEY is missing from the Render service environment.",
     }, { status: 503, headers: { "Cache-Control": "no-store" } });
   }
 
+  let model = "gemini-3.8-flash";
   try {
-    const { response, model } = await requestGeminiInteraction("Reply with the single word OK.", 16, 12000);
+    const result = await requestGeminiInteraction("Reply with the single word OK.", 16, 12000);
+    const response = result.response;
+    model = result.model;
 
     if (!response.ok) {
       let detail = "";
