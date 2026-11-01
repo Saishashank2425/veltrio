@@ -148,3 +148,30 @@ export async function recordPayPalCapture(ownerId: string, input: {
   return withTransaction(client => recordCaptureOnce(client, ownerId, input));
 }
 
+
+export async function listFinanceRecords(ownerId: string) {
+  await ensureSchema();
+  const result = await getPool().query(
+    "SELECT record FROM finance_records WHERE owner_id = $1 ORDER BY updated_at DESC LIMIT 5000",
+    [ownerId],
+  );
+  return result.rows.map(row => row.record);
+}
+
+export async function saveFinanceRecords(ownerId: string, records: Array<{ id: string; kind: string; [key: string]: unknown }>) {
+  await withTransaction(async client => {
+    for (const record of records) {
+      await client.query(
+        `INSERT INTO finance_records (owner_id, id, kind, record, updated_at)
+         VALUES ($1, $2, $3, $4::jsonb, now())
+         ON CONFLICT (owner_id, id) DO UPDATE SET kind = EXCLUDED.kind, record = EXCLUDED.record, updated_at = now()`,
+        [ownerId, record.id, record.kind, JSON.stringify(record)],
+      );
+    }
+  });
+}
+
+export async function deleteFinanceRecord(ownerId: string, id: string) {
+  await ensureSchema();
+  await getPool().query("DELETE FROM finance_records WHERE owner_id = $1 AND id = $2", [ownerId, id]);
+}
