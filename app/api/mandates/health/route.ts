@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requestGeminiInteraction } from "@/lib/gemini";
 
 /**
  * Safe, server-side Gemini diagnostic.
@@ -10,31 +11,14 @@ export async function GET() {
     return NextResponse.json({
       ok: false,
       provider: "Gemini",
-      model: "gemini-3.8-flash",
+      model,
       configured: false,
       message: "GEMINI_API_KEY is missing from the Render service environment.",
     }, { status: 503, headers: { "Cache-Control": "no-store" } });
   }
 
   try {
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/interactions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey,
-        },
-        body: JSON.stringify({
-          model: "gemini-3.8-flash",
-          input: "Reply with the single word OK.",
-          store: false,
-          generation_config: { thinking_level: "low", max_output_tokens: 16 },
-        }),
-        cache: "no-store",
-        signal: AbortSignal.timeout(25000),
-      },
-    );
+    const { response, model } = await requestGeminiInteraction("Reply with the single word OK.", 16, 12000);
 
     if (!response.ok) {
       let detail = "";
@@ -48,7 +32,7 @@ export async function GET() {
       return NextResponse.json({
         ok: false,
         provider: "Gemini",
-        model: "gemini-3.8-flash",
+        model,
         configured: true,
         httpStatus: response.status,
         message: detail.slice(0, 240) || "Gemini rejected the test request. Check the API key, project access, and quota in Google AI Studio.",
@@ -66,7 +50,7 @@ export async function GET() {
       return NextResponse.json({
         ok: false,
         provider: "Gemini",
-        model: "gemini-3.8-flash",
+        model,
         configured: true,
         message: "Gemini accepted the request but returned no text. Check model access and quota.",
       }, { status: 502, headers: { "Cache-Control": "no-store" } });
@@ -75,7 +59,7 @@ export async function GET() {
     return NextResponse.json({
       ok: true,
       provider: "Gemini",
-      model: "gemini-3.8-flash",
+      model,
       configured: true,
       message: "Gemini API key and model request are working.",
     }, { headers: { "Cache-Control": "no-store" } });
@@ -85,10 +69,10 @@ export async function GET() {
     return NextResponse.json({
       ok: false,
       provider: "Gemini",
-      model: "gemini-3.8-flash",
+      model,
       configured: true,
       message: timeout
-        ? "Gemini did not respond within 10 seconds. Retry shortly and check provider availability."
+        ? "Gemini did not respond within the configured timeout. Retry shortly; deterministic mandate parsing remains available."
         : "Could not reach Gemini. Check outbound network access and retry.",
     }, { status: 502, headers: { "Cache-Control": "no-store" } });
   }
