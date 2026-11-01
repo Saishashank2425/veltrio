@@ -39,6 +39,20 @@ export async function ensureSchema(): Promise<void> {
             throw error;
           }
         }
+
+        const financeMigration = await client.query("SELECT 1 FROM schema_migrations WHERE version = $1", ["002_finance_records"]);
+        if (financeMigration.rowCount === 0) {
+          const sql = await readFile(resolve(process.cwd(), "migrations/002_finance_records.sql"), "utf8");
+          await client.query("BEGIN");
+          try {
+            await client.query(sql);
+            await client.query("INSERT INTO schema_migrations(version) VALUES ($1)", ["002_finance_records"]);
+            await client.query("COMMIT");
+          } catch (error) {
+            await client.query("ROLLBACK");
+            throw error;
+          }
+        }
       } catch (error) {
         globalForPool.veltrioSchema = undefined;
         throw error;
