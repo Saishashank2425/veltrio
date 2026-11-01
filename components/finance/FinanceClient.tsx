@@ -99,17 +99,35 @@ export default function FinanceClient() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed: unknown = JSON.parse(raw);
-        if (Array.isArray(parsed)) setRecords(parsed as FinancialRecord[]);
+    let cancelled = false;
+    async function loadRecords() {
+      try {
+        const response = await fetch("/api/finance/records", { cache: "no-store" });
+        if (!response.ok) throw new Error("Server finance storage is unavailable.");
+        const data = await response.json() as { records?: FinancialRecord[] };
+        if (!cancelled && Array.isArray(data.records)) {
+          setRecords(data.records);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(data.records));
+        }
+      } catch {
+        if (!cancelled) {
+          try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+              const parsed: unknown = JSON.parse(raw);
+              if (Array.isArray(parsed)) setRecords(parsed as FinancialRecord[]);
+            }
+            setNotice("Could not reach secure finance storage. Showing this browser's backup; changes may not sync.");
+          } catch {
+            setNotice("Finance records could not be loaded. Check your connection and try again.");
+          }
+        }
+      } finally {
+        if (!cancelled) setHydrated(true);
       }
-    } catch {
-      setNotice("Saved browser data could not be read. Export any important data before clearing browser storage.");
-    } finally {
-      setHydrated(true);
     }
+    void loadRecords();
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
@@ -168,7 +186,7 @@ export default function FinanceClient() {
     setShowForm(true);
   }
 
-  function saveRecord(event: FormEvent<HTMLFormElement>) {
+  async function saveRecord(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const amount = amountValue(draft.amount);
     if (!draft.name.trim()) { setNotice("Enter a name or description."); return; }
@@ -208,17 +226,31 @@ export default function FinanceClient() {
       createdAt: editingId ? records.find((r) => r.id === editingId)?.createdAt || now : now,
       updatedAt: now,
     };
-    setRecords((prev) => editingId ? prev.map((r) => r.id === editingId ? record : r) : [record, ...prev]);
-    setShowForm(false);
-    setEditingId(null);
-    setDraft(emptyDraft());
-    setNotice(editingId ? "Record updated." : "Record saved in this browser.");
+    try {
+      const response = await fetch("/api/finance/records", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(record),
+      });
+      if (!response.ok) throw new Error("Server could not save this record.");
+      setRecords((prev) => editingId ? prev.map((r) => r.id === editingId ? record : r) : [record, ...prev]);
+      setShowForm(false);
+      setEditingId(null);
+      setDraft(emptyDraft());
+      setNotice(editingId ? "Record updated and synced." : "Record saved securely.");
+    } catch {
+      setNotice("Could not save to the server. Your existing records are unchanged; please retry.");
+    }
   }
 
-  function deleteRecord(record: FinancialRecord) {
+  async function deleteRecord(record: FinancialRecord) {
     if (!window.confirm(`Delete "${record.name}"? This only removes the record from this browser.`)) return;
-    setRecords((prev) => prev.filter((r) => r.id !== record.id));
-    setNotice("Record deleted.");
+    try {
+      const response = await fetch(`/api/finance/records?id=${encodeURIComponent(record.id)}`, { method: "DELETE" });
+      if (!response.ok) throw new Error("Delete failed");
+      setRecords((prev) => prev.filter((r) => r.id !== record.id));
+      setNotice("Record deleted from secure storage.");
+    } catch {
+      setNotice("Could not delete this record from the server. Please retry.");
+    }
   }
 
   async function handleCsv(file?: File) {
@@ -245,10 +277,19 @@ export default function FinanceClient() {
     }
   }
 
-  function commitCsv() {
+  async function commitCsv() {
     if (!csvPreview) return;
-    setRecords((prev) => [...csvPreview, ...prev]);
-    setNotice(`Imported ${csvPreview.length} transactions; skipped ${csvSkipped} likely duplicates. ${csvErrors.length} invalid rows were rejected.`);
+    try {
+      const response = await fetch("/api/finance/records", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(csvPreview),
+      });
+      if (!response.ok) throw new Error("Import could not be saved.");
+      setRecords((prev) => [...csvPreview, ...prev]);
+      setNotice(`Imported ${csvPreview.length} transactions to secure storage; skipped ${csvSkipped} likely duplicates. ${csvErrors.length} invalid rows were rejected.`);
+    } catch {
+      setNotice("CSV import could not be saved to the server. No records were imported.");
+      return;
+    }
     setCsvPreview(null); setCsvErrors([]); setCsvSkipped(0); setCsvInputKey((k) => k + 1);
   }
 
@@ -286,7 +327,7 @@ export default function FinanceClient() {
           <input key={csvInputKey} ref={fileRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => handleCsv(e.target.files?.[0])}/>
         </div>
 
-        <div className="mb-5 rounded-xl border border-blue-100 bg-blue-50/80 px-4 py-3 text-sm text-blue-900"><strong>Local prototype:</strong> Records are saved in this browser only. No bank account is connected and no payment is initiated. Export a backup before clearing browser data.</div>
+        <div className="mb-5 rounded-xl border border-blue-100 bg-blue-50/80 px-4 py-3 text-sm text-blue-900"><strong>Manual finance tracking:</strong> Records sync to your private Veltrio session in PostgreSQL. No bank account is connected and no payment is initiated. Export a backup whenever needed.</div>
         {notice && <div role="status" className="mb-5 flex items-start justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm"><span>{notice}</span><button aria-label="Dismiss notification" onClick={() => setNotice("")}><X size={16}/></button></div>}
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
