@@ -1,13 +1,27 @@
 # Veltrio
 
+## Try Veltrio
+
+- **Live application:** https://veltrio-u9tu.onrender.com/
+- **Agent Hub:** https://veltrio-u9tu.onrender.com/agents
+- **Product discovery:** https://veltrio-u9tu.onrender.com/shop
+- **Spending mandates:** https://veltrio-u9tu.onrender.com/mandates
+- **Finance dashboard:** https://veltrio-u9tu.onrender.com/finance
+- **Payment demo (PayPal Sandbox):** https://veltrio-u9tu.onrender.com/checkout
+- **Authorization demo:** https://veltrio-u9tu.onrender.com/demo
+- **Source code:** https://github.com/Saishashank2425/veltrio
+
+The deployed app is a hackathon prototype. Provider-backed actions depend on server-side API credentials, and PayPal checkout uses sandbox accounts only. Render may take a short time to wake the service after inactivity.
+
+
 **A policy-first trust layer for AI-initiated commerce.** A shopping agent can research and propose a purchase, but Veltrio checks the proposal before checkout. The demo gateway returns `ALLOW`, `BLOCK`, or `ESCALATE`; an allowed proposal can continue to a PayPal **sandbox** order.
 
-> **Prototype boundary:** never use production payment credentials. PayPal checkout is sandbox-only and requires server-side credentials. Product search requires a Channel3 key (preferred) or optional SerpApi fallback. Gemini-assisted mandate extraction requires a Gemini API key. Saved mandates, the audit log, and spend counters are not durable, and saved mandates are not yet wired into the gateway policy. This is not a production financial product.
+> **Prototype boundary:** never use production payment credentials. PayPal checkout is sandbox-only and requires server-side credentials. Product search requires a Channel3 key (preferred) or optional SerpApi fallback. Gemini-assisted mandate extraction requires a Gemini API key. Mandates, authorization/audit records, and Finance records use session-scoped PostgreSQL persistence where implemented. Finance entries are manually tracked; they are not bank-synced. User-created mandates should not be assumed to override the sample checkout policy unless explicitly connected in the active flow. This is not a production financial product.
 
 ## Product flow
 
 1. **Discover:** use Agent Hub and product search to find real product listings.
-2. **Describe policy:** draft spending limits and merchant restrictions from natural language. Gemini 2.5 Flash is used when configured; otherwise the deterministic parser is used.
+2. **Describe policy:** draft spending limits and merchant restrictions from natural language. Gemini-assisted extraction is used when configured, with a deterministic fallback when the provider is unavailable.
 3. **Authorize:** submit a structured proposal to the deterministic gateway. The gateway does not use an LLM for its final decision.
 4. **Checkout:** only an `ALLOW` proposal can create a PayPal sandbox order. `BLOCK` and `ESCALATE` stop before an order is created.
 5. **Capture:** after the sandbox buyer approves, Veltrio asks PayPal to capture the order and records demo spend only when PayPal confirms a completed capture.
@@ -52,14 +66,14 @@ The deterministic gateway remains separate from the AI layer: no model call part
 - `/` — overview and directory for every workspace.
 - `/agents` — local-browser agent workspace prototype.
 - `/shop` — product search using Channel3 or optional SerpApi.
-- `/mandates` — natural-language mandate draft and review; saved in browser local storage.
-- `/demo` — deterministic gateway policy demo and in-memory audit trace.
+- `/mandates` — natural-language mandate creation and management.
+- `/demo` — deterministic gateway policy demo.
 - `/checkout` — policy-gated PayPal sandbox order creation and capture.
-- `/finance` — manual, browser-local finance organizer; no bank connection.
+- `/finance` — manual finance organizer with session-scoped PostgreSQL storage; no bank connection.
 
 ## Stack
 
-Next.js App Router, React, TypeScript, Tailwind CSS v4, Framer Motion, Lucide, PayPal Orders API (sandbox), Channel3 product search API (optional key), Gemini 2.5 Flash (optional key), and Render hosting.
+Next.js App Router, React, TypeScript, Tailwind CSS v4, Framer Motion, Lucide, PayPal Orders API (sandbox), Channel3 product search API (optional key), Gemini model failover (optional key), and Render hosting.
 
 ## Run locally
 
